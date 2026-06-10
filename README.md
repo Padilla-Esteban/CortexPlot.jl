@@ -53,7 +53,10 @@ This package allows the visualization in 2D and 3D of functional brain neuroimag
 
 - the visualization of test-statistics obtained by testing, voxel-by-voxel, *p* hypotheses on data produced by [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl). For instance, one can perform these tests and correct for the multiplicity of comparisons across voxels using (PermutationTests.jl)[https://github.com/Marco-Congedo/PermutationTests.jl].
 
-Several images can be plotted, one after the other or as an animated sequence. The different frames of the sequence typically represent time samples, for example in event-related potentials, frequencies, or experimental conditions. 
+
+> [!TIP] 
+> Several images can be plotted, one after the other or as an animated sequence. The different frames of the sequence typically represent time samples, 
+> for example in event-related potentials, frequencies, or experimental conditions. 
 
 The standard cortices used in this package are read from [Leadfields.jl](https://github.com/Marco-Congedo/Leadfields.jl). They have been pre-computed via [BrainStorm](https://neuroimage.usc.edu/brainstorm/Introduction) by [OpenMEEG](https://openmeeg.github.io/), using the ‘fsaverage’ adult head model (FreeSurfer’s default template based on 40 normative brains). The computation of the associated leadfields is based on the Boundary Element Method (BEM).
 
@@ -154,19 +157,21 @@ Several additional controls are available, as listed in this table:
 | Color scale   | non-linearity of the color map  | all               |
 | Display max   | set the sections through the voxel with maximum value       | 3., 5.            |
 
-> NB: with *Global* scaling all frames are scaled to the maximum across all; with *Local* scaling each frame is scaled to its own maximum.
+NB: with *Global* scaling all frames are scaled to the maximum across all; with *Local* scaling each frame is scaled to its own maximum.
 
 > [!TIP] 
-> In addition to all the controls listed above, all the basic Makie interactions remain possible. In particular,
+> In addition to all the controls listed above, all the basic Makie interactions remain possible. In particular:
+>
 > **2D plots:**
-> - *Primary mouse button click and drag*: zoom in
+>
+> - *Primary mouse button click and Drag*: zoom in
 > - *CTRL + Primary mouse button click*: reset
 >
 > **3D plots:**
 >
-> - *Primary mouse button click and drag*: rotate
+> - *Primary mouse button click and Drag*: rotate
 > - *SHIFT + Primary mouse button click*: reset rotation
-> - *Secondary mouse button click and drag*: pan
+> - *Secondary mouse button click and Drag*: pan
 > - *Mouse wheel*: zoom in & out
 > - *CTRL + Primary mouse button click*: reset pas and zooming
 
