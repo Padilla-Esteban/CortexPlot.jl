@@ -1,0 +1,249 @@
+# - Main Function -
+function cortex2D_3view(brain,
+                        parent :: GridLayout, 
+                        J :: Union{Matrix{Float32}, Matrix{Float64}},
+                        colors_obs :: Observable,
+                        alpha :: Observable,
+                        global_scale :: Observable,
+                        scale_gamma :: Observable;
+                        colormap :: Symbol = :redsblues,
+                        datatype :: Symbol = :positive,
+                        fontsize :: Real = 16.0
+                        )
+    """
+    Args:
+    brain: the loaded .stl file
+    parent: the GridLayout where the cortex and sliders will be displayed
+    J: the data matrix/vector 
+    colors_obs: an observable containing a data vector which changes with the time 
+    alpha: an Observable containing the value used for the alpha parameter in mesh! 
+    global_scale: an observable containing either :global or :local which dictates if the scale used for the mesh is global or local
+    scale_gamma: an observable containing a float which allows the colorscale changes
+    colormap: the symbol of the used colormap for the mesh!
+    datatype: a symbol which is either :positive or :real depending on wether J contains only positive values or not
+
+    Makes the sliders and buttons appear in `parent`.
+    Initializes the global variables used by the other functions of the file
+    Calls the function display_2D_3slices a first time to display the (0,0,0) slices
+    Then sets up the controls 
+    """
+    global three_view_ax_nx, three_view_ax_ny, three_view_ax_nz
+    global three_view_axis, three_view_parent, three_view_widgets
+    global three_view_pos_x, three_view_pos_y, three_view_pos_z
+    global three_view_thick_x, three_view_thick_y, three_view_thick_z
+    global three_view_lim_obs
+
+    three_view_ax_nx     = nothing
+    three_view_ax_ny     = nothing
+    three_view_ax_nz     = nothing
+    three_view_axis = Axis[]
+    three_view_parent    = parent
+    three_view_widgets = []
+
+    three_view_pos_x = Observable(0.0f0)
+    three_view_pos_y = Observable(0.0f0)
+    three_view_pos_z = Observable(0.0f0)
+    three_view_thick_x = Observable(5.0f0)
+    three_view_thick_y = Observable(5.0f0)
+    three_view_thick_z = Observable(5.0f0)
+
+    limits = global_scale[] ? Observable(get_limits(J, datatype=datatype)) : @lift get_limits($colors_obs, datatype=datatype)   
+    three_view_lim_obs = limits 
+
+    display_2D_3slices(brain, 0.0f0, 0.0f0, 0.0f0, colors_obs, alpha, colormap, datatype, limits, scale_gamma, fontsize)
+    
+    pts = [p for tri in brain for p in tri]
+
+    lo_x, hi_x = get_range(1, pts)
+    lo_y, hi_y = get_range(2, pts)
+    lo_z, hi_z = get_range(3, pts)
+
+    lbl_x     = Label(three_view_parent[2, 1][2, 1][1, 1], "X")
+    sl_x      = Slider(three_view_parent[2, 1][2, 1][1, 2], range = round(lo_x):0.5:hi_x, startvalue = three_view_pos_x[])
+    connect!(three_view_pos_x, sl_x.value)
+    lbl_x_var = Label(three_view_parent[2, 1][2, 1][1, 3], @lift("$(round($three_view_pos_x, digits=3))"), width = 50)
+    
+    lbl_y     = Label(three_view_parent[2, 2][2, 1][1, 1], "Y")
+    sl_y      = Slider(three_view_parent[2, 2][2, 1][1, 2], range = round(lo_y):0.5:hi_y, startvalue = three_view_pos_y[])
+    connect!(three_view_pos_y, sl_y.value)
+    lbl_y_var = Label(three_view_parent[2, 2][2, 1][1, 3], @lift("$(round($three_view_pos_y, digits=3))"), width = 50)
+
+    lbl_z     = Label(three_view_parent[2, 3][2, 1][1, 1], "Z")
+    sl_z      = Slider(three_view_parent[2, 3][2, 1][1, 2], range = round(lo_z):0.5:hi_z, startvalue = three_view_pos_z[])
+    connect!(three_view_pos_z, sl_z.value)
+    lbl_z_var = Label(three_view_parent[2, 3][2, 1][1, 3], @lift("$(round($three_view_pos_z, digits=3))"), width = 50)
+
+    lbl_three_view_thick_x     = Label(three_view_parent[2, 1][3, 1][1, 1], "Thickness")
+    sl_three_view_thick_x      = Slider(three_view_parent[2, 1][3, 1][1, 2], range = 0:0.005:150, startvalue = three_view_thick_x[])
+    connect!(three_view_thick_x, sl_three_view_thick_x.value)
+    lbl_three_view_thick_x_var = Label(three_view_parent[2, 1][3, 1][1, 3], @lift("$(round($three_view_thick_x, digits=3))"), width = 50)
+    
+    lbl_three_view_thick_y     = Label(three_view_parent[2, 2][3, 1][1, 1], "Thickness")
+    sl_three_view_thick_y      = Slider(three_view_parent[2, 2][3, 1][1, 2], range = 0:0.005:150, startvalue = three_view_thick_y[])
+    connect!(three_view_thick_y, sl_three_view_thick_y.value)
+    lbl_three_view_thick_y_var = Label(three_view_parent[2, 2][3, 1][1, 3], @lift("$(round($three_view_thick_y, digits=3))"), width = 50)
+    
+    lbl_three_view_thick_z     = Label(three_view_parent[2, 3][3, 1][1, 1], "Thickness")
+    sl_three_view_thick_z      = Slider(three_view_parent[2, 3][3, 1][1, 2], range = 0:0.005:150, startvalue = three_view_thick_z[])
+    connect!(three_view_thick_z, sl_three_view_thick_z.value)
+    lbl_three_view_thick_z_var = Label(three_view_parent[2, 3][3, 1][1, 3], @lift("$(round($three_view_thick_z, digits=3))"), width = 50)
+    
+    display_max = Button(three_view_parent[1, 2][1, 1], label = "Display max")
+    max_coord_lbl = Label(three_view_parent[1, 3][1, 1], "x = 0.0  |  y = 0.0  |  z = 0.0")
+
+    colsize!(three_view_parent, 1, Relative(0.3))
+    colsize!(three_view_parent, 2, Relative(0.3))
+    colsize!(three_view_parent, 3, Relative(0.3))
+
+    push!(three_view_widgets, display_max, max_coord_lbl,
+        lbl_x, sl_x, lbl_x_var,
+        lbl_y, sl_y, lbl_y_var,
+        lbl_z, sl_z, lbl_z_var,
+        lbl_three_view_thick_x, sl_three_view_thick_x, lbl_three_view_thick_x_var, 
+        lbl_three_view_thick_y, sl_three_view_thick_y, lbl_three_view_thick_y_var, 
+        lbl_three_view_thick_z, sl_three_view_thick_z, lbl_three_view_thick_z_var)
+
+    on(display_max.clicks) do s
+        index = argmax(colors_obs[])
+        pos = brain.position
+        pt = pos[index]
+        x, y, z = Float32(pt[1]), Float32(pt[2]), Float32(pt[3])
+        display_2D_3slices(brain, x, y, z, colors_obs, alpha, colormap, datatype, limits, scale_gamma, fontsize)
+        max_coord_lbl.text[] = @sprintf("x = %.3f  |  y = %.3f  |  z = %.3f", x, y, z)
+        set_close_to!(sl_x, x)
+        set_close_to!(sl_y, y)
+        set_close_to!(sl_z, z)
+    end
+end
+
+
+# - Side Functions -
+
+function display_2D_3slices(brain, x, y, z, colors_obs, alpha, colormap, datatype, limits, scale_gamma, fontsize)
+    """
+    Clears the axis if some slices were already displayed
+    Then calls the function that displays a slice 3 times (one per axis)
+    """
+    global three_view_axis, three_view_ax_nx, three_view_ax_ny, three_view_ax_nz, three_view_parent
+    global three_view_pos_x, three_view_pos_y, three_view_pos_z, three_view_thick_x, three_view_thick_y, three_view_thick_z
+
+    for ax in [three_view_ax_nx, three_view_ax_ny, three_view_ax_nz]
+        if ax !== nothing
+            try; empty!(ax); catch; end
+            try; delete!(ax); catch; end
+        end
+    end
+
+    three_view_pos_x[] = x
+    three_view_pos_y[] = y
+    three_view_pos_z[] = z
+
+    three_view_ax_nx = display_2D_slice(brain, 1, three_view_pos_x, three_view_thick_x, three_view_parent[2, 1], " x-normal slice", colors_obs, alpha, colormap, datatype, limits, scale_gamma, fontsize)
+    three_view_ax_ny = display_2D_slice(brain, 2, three_view_pos_y, three_view_thick_y, three_view_parent[2, 2], "y-normal slice", colors_obs, alpha, colormap, datatype, limits, scale_gamma, fontsize)
+    three_view_ax_nz = display_2D_slice(brain, 3, three_view_pos_z, three_view_thick_z, three_view_parent[2, 3], "z-normal slice", colors_obs, alpha, colormap, datatype, limits, scale_gamma, fontsize)
+
+
+end
+
+function display_2D_slice(brain, axis, pos_obs, thick_obs, cell, title, colors_obs, alpha, colormap, datatype, limits, scale_gamma, fontsize)
+    """
+    Displays the slice located on "pos" along "axis" in a 2d axis
+    """
+    global three_view_parent, three_view_axis, three_view_widgets
+
+    azimuth   = axis == 1 ? pi/2  : axis == 2 ? 0.0 : 0.0
+    elevation = axis == 3 ? pi/2 : 0.0
+    R  = make_view_rotation(azimuth, elevation)
+    rb = rotate_mesh_for_view(brain, R)
+
+    clip = @lift begin
+        slab = make_2D_slab($pos_obs, abs(axis), $thick_obs)
+        rotate_clip_planes(slab, R)
+    end
+
+    ax = Axis(cell[1, 1], aspect = DataAspect(), title = title,
+                xlabelsize = fontsize,
+                ylabelsize = fontsize,
+                xticklabelsize = fontsize,
+                yticklabelsize = fontsize
+                )
+
+    push!(three_view_axis, ax)
+    
+    mesh!(                #brain anatomy display
+        ax,
+        rb,
+        color = RGBf(0.999, 0.999, 0.999),
+        clip_planes = clip,
+        alpha = alpha,
+        backlight = 1.0
+
+    )
+    colors_rgba = @lift activation_rgba(
+        $colors_obs,      # per-vertex activation values (already indexed by vertex_per_face)
+        colormap,           
+        $limits,
+        midpoint = $scale_gamma
+    )
+    mesh!(                #brain activation display 
+        ax,
+        rb,
+        color        = colors_rgba,
+        transparency = true,
+        overdraw = true,
+        clip_planes = clip  
+    )
+
+    if axis == 3
+        cb = Colorbar(three_view_parent[2, 4],
+            colormap   = Reverse(colormap),
+            colorrange = limits[],
+            label      = "Current density module",
+        )
+        push!(three_view_widgets, cb)
+
+        on(limits, update=true) do lims
+            cb.colorrange = lims
+        end
+    end
+
+    return ax
+end
+
+
+function clear_3view()
+    """
+    Clears everything created by the functions above
+    Puts global variables back to 'nothing' if needed
+    """
+    global three_view_axis, three_view_widgets, three_view_parent
+    global three_view_ax_nx, three_view_ax_ny, three_view_ax_nz
+    global three_view_lim_obs
+
+    try
+        try; empty!(three_view_axis); catch; end
+        try; delete!(three_view_axis); catch; end
+    
+
+    for w in three_view_widgets
+        try; delete!(w); catch; end
+    end
+    
+
+    for ax in [three_view_ax_nx, three_view_ax_ny, three_view_ax_nz]
+        if ax !== nothing
+            try; empty!(ax); catch; end
+            try; delete!(ax); catch; end
+        end
+    end
+
+    if three_view_lim_obs !== nothing
+        empty!(three_view_lim_obs.listeners)  
+        three_view_lim_obs = nothing
+    end
+
+    try; delete!(three_view_parent); catch; end
+    catch;
+    end
+end
+    
