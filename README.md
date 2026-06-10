@@ -1,6 +1,4 @@
 
-**UNDER CONSTRUCTION**
-
 ![header](Documents/header.png) 
 
 ---
@@ -83,18 +81,18 @@ the inverse solution functional data on top of structural (cortex) images.
 The package exports only two functions:
 
 ```julia
-function cortex_dashboard(data :: Union{Vector{Real}, Matrix{Real}};
+function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
                         voxels :: Int64 = 2503,
                         alpha :: Real = 1.0,
                         fontsize :: Real = 16.0
-                        )
+                        )where {A<:Real}
 ```
 
 **Argument**
 
 - `data`: a current density vector or matrix (J for example) containing the data the user wants to visualize.
 
-**Optional Keyword Argument**
+**Optional Keyword Arguments**
 - `voxels`: the number of voxels p in the head model. It can be `2503` or `5002`. 
 - `alpha`: the starting value of alpha for the display. 
 - `fontsize`: the size of the plot's ticks. Its default value (16.0) is the Makie's default value.  
@@ -112,38 +110,38 @@ Some controllers are common to all the display modes:
 - `Time/frequency`: a slider that allows the user to move the EEG time/frequency. It is associated with a play/pause button that can be clicked to let the time advance automatically.
 - `Alpha`: a slider that allows the user to change the alpha of all the plots.
 - `Colorscale`: a slider that allows the user to modify the colorscale used to display the `data`. It takes the middle scale color and moves it to the value associated to the slider. The colorbar updates automatically when the slider is moved to let the user understand what he is changing.
-- `Colormap`:   
+- `Colormap`: a menu that allows the user to switch between different colormaps for the plots. The colormap list contains 4 options by default but can be changed by the user with the `colormap` argument.
 
 
 > [!TIP] 
-> If the leadfield is needed to compute an inverse solution by package [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl), `labels` must hold the electrode labels for your data, in the same order used there, and `reference` must be 0.0 (default).
+> In addition to all the interactions listed above, all the basic Makie interactions remain possible (see [here](https://docs.makie.org/stable/reference/blocks/axis3#Axis3-interactions) for 3D plots; and see [here](https://docs.makie.org/stable/reference/blocks/axis#Axis-interaction) for 2D plots)
 
-The following options are for advanced use of the Gedai.jl artifact rejection algorithm only (or if you know what you are doing):
-
-1) If `reference` is equal to an electrode label (a string), the leadfield matrix is re-referenced to that electrode.
-- case 1.1: `labels` is not provided:
-    n = 343-1, since the elements of (a, b, c) corresponding to that electrode are removed.
-- case 1.2: `labels` is provided:
-    - 1.2.a: `reference` is in labels:
-        n = length(labels)-1, since the elements of (a, b, c) corresponding to that electrode are removed.
-    - 1.2.b: `reference` is not in labels:
-        n = length(labels)
-
-2) If `reference` is a real value, the leadfield matrix is re-referenced to the (common average reference + `reference`), thus if `reference` = 0.0 (default), it is referenced to the (rank-deficient) common average reference, and if `reference` = 1.0, it referenced to the full-rank pseudo common average reference used by default in the [Gedai](https://github.com/Marco-Congedo/Gedai) denoising algorithm.
-See the [Eegle.car!](https://marco-congedo.github.io/Eegle.jl/stable/Processing/#Eegle.Processing.car!) function for explanations
-on the common average reference.
 
 [▲ index](#-index)
 
 ```julia
-function gen_cortex_stl(savepath::String; voxels::Int = 2503)
+function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
+                        voxels :: Int64 = 2503,
+                        alpha :: Real = 1.0,
+                        mode :: Symbol = :cortex3D,
+                        fontsize :: Real = 16.0)where {A<:Real}
 ```
 
-Generate and save a .stl file for plotting the cortex in 2D or 3D using *Makie.jl* given the default brainstorm surface .mat file
-generated for the given number of `voxels`. `voxels` can be 2503 (default) or 5002, which will create the .stl file
-for the leadfield with 2503 or 5002 voxels, respectively. No .stl can be generated for the model with 1203 voxels.
+**Argument**
 
-`savepath` is the full path of the file where the .stl file will be saved.
+- `data`: a current density vector or matrix (J for example) containing the data the user wants to visualize.
+
+**Optional Keyword Arguments**
+- `voxels`: the number of voxels p in the head model. It can be `2503` or `5002`. 
+- `alpha`: the starting value of alpha for the display. 
+- `mode`: a symbol that tells the function which display mode the user wants.
+- `fontsize`: the size of the plot's ticks. Its default value (16.0) is the Makie's default value.  
+
+**Display**
+Opens a window with the same content than `cortex_dashboard` but without the mode selection menu. The user has to choose which display mode he wants with the `mode` argument. The possible options for this argument are symbols with the name of the display mode (example: `:cortex3D` for the `cortex3D` mode or `:cortex2D_8view` for the `cortex2D_8view` mode).
+
+> [!TIP] 
+> This function should only be used by the users that know what they want to do, because it is faster to load and display than `cortex_dashboard`. Otherwise, it is recommended to use `cortex_dashboard` because it allows to switch between the display modes without closing the window and re-executing a script. 
 
 [▲ index](#-index)
 
@@ -151,52 +149,47 @@ for the leadfield with 2503 or 5002 voxels, respectively. No .stl can be generat
 
 ## 💡 Examples
 
-**Example for computing inverse solutions**
+**Example using Eegle data**
 
 ```julia
-using Leadfields
-labels = ["FP1", "FP2", "F3", "F4", "C3", "C4", "P3", "P4", "O1", "O2"]
-K, ename, eloc, gridloc = leadfield(labels) # default 2503-vector head model
+using CortexPlot
+using EEGPlot, Eegle, GLMakie, Leadfields, Xloreta
+
+# Example if you have data
+
+# read example EEG data, sampling rate and sensor labels from Eegle
+X, sr = readASCII(EXAMPLE_Normative_1), 128;
+sensors = readSensors(EXAMPLE_Normative_1_sensors);
+
+X = X[1:sr, :] # choose only the 128 first lines of X
+
+# computes leadfield matrix with Leadfields, you can choose voxels = 2503 or voxels = 5002
+K, ename, eloc, gridloc = leadfield(sensors; voxels = 5002) 
+
+# calculation of T with Xloreta, you can change the alpha
+T = sLORETA(Float64.(K), 1) 
+
+J_raw = T * Transpose(X)  # calculation of J_raw (size : (voxels*3) × n_times)
+
+J = hcat([cd2sm(J_raw[:, t]) for t in 1:size(J_raw, 2)]...)  # calculation of J ( size : voxels × n_times)
+
+# This is optional, to have a title and display in full screen mode directly
+GLMakie.activate!(title = "Cortex Viewer", fullscreen = true) 
+
+cortex_dashboard(J, voxels = 5002) # all mods with a dashboard
+
+# if a specific mode is desired, use instead, for example:
+#cortex_plot(J, voxels = 2503, mode = :cortex3D_slice)
 ```
 
-- `K` is a 10×7509(2503x3) leadfield matrix referenced to the (rank-deficient) CAR, i.e., the usual CAR.
-- `ename` is equal to `labels`
-- `eloc` is a vector holding 10 vectors, each one with the 3D electrode cartesian coordinates
-- `gridloc` is a vector holding 1210 vectors with the 3D voxels cartesian coordinates
 
-For using the 5002-voxel model, use instead:
-```julia
-using Leadfields
-labels = ["FP1", "FP2", "F3", "F4", "C3", "C4", "P3", "P4", "O1", "O2"]
-K, ename, eloc, gridloc = leadfield(labels; voxels=5002) 
-```
-
-**Example for use with GEDAI denoising**
-
-See the last example [here](https://github.com/Marco-Congedo/Gedai/tree/master?tab=readme-ov-file#-examples).
-
-
-**Example for generating and saving .stl files**
-
-```julia
-using Leadfields
-gen_cortex_stl(joinpath(homedir(), "cortex_2503.stl"))
-```
-This will generate the .stl file for the leadfield with 2503 voxels (default) and store it in the home directory.
-
-To generate the .stl file for the leadfield with 5002 voxels, use instead:
-
-```julia
-using Leadfields
-gen_cortex_stl(joinpath(homedir(), "cortex_5002.stl"); voxels = 5002)
-```
 [▲ index](#-index)
 
 ![separator](Documents/separator.png)
 
 ## ✍️ About the Author
 
-[Marco Congedo](https://github.com/Marco-Congedo), Arthur Tatlian, Esteban Padilla and [Tomas Ros](https://github.com/neurotuning-personal).
+[Marco Congedo](https://github.com/Marco-Congedo), [Arthur Tatlian](https://github.com/Arthtat) and [Esteban Padilla](https://github.com/Padilla-Esteban)
 
 [▲ index](#-index)
 
