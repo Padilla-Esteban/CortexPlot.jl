@@ -48,7 +48,7 @@ Pkg.add(url="https://github.com/Marco-Congedo/CortexPlot.jl")
 
 This package allows the visualization in 2D and 3D of functional brain neuroimaging data using a color code on top of a structural cortical image. Several kind of plots are available, individually or altogether in a *dashboard* that allows to easily switch from one to the other. All plots can be inspected and several parameters can be changed on the fly within the dashboard. Typical visualizations of this package concern:
 
-- current density square module for *p* voxels as computed by a vector-type distributed EEG inverse solution using [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl). 
+- current density square module for *p* voxels as computed by [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl). 
 
 - test-statistics obtained by testing, voxel-by-voxel, *p* hypotheses on data produced by [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl). For instance, one can perform these tests and correct for the multiplicity of comparisons across voxels using (PermutationTests.jl)[https://github.com/Marco-Congedo/PermutationTests.jl].
 
@@ -70,7 +70,7 @@ This package allows the visualization in 2D and 3D of functional brain neuroimag
 
 ## 🔌 API
 
-The package exports only two functions. The main function is:
+The package exports only two functions. The main function is a **dashboard**:
 
 ```julia
 function cortex_dashboard(data :: Union{Vector{Real}, Matrix{Real}};
@@ -91,13 +91,11 @@ function cortex_dashboard(data :: Union{Vector{Real}, Matrix{Real}};
 - `alpha`: the transparency of the cortex. By default it is 1.0 (completely opaque). 
 - `title`: the title of the plot. 
 - `colorbar_label`: the label of the color bar. By default it is "current density squared module".
-- `fontsize`: the size of axies' font. Its default value (16.0) is the Makie's default value.  
+- `fontsize`: the size of the font for the axes. Its default value (16.0) is the Makie's default value.  
 
-**Display**
+The dashboard contains drop-box menus, text boxes, sliders and buttons.
 
-Opens a window containing menus, sliders and buttons.
-
-The first drop-box menu allows the user to switch between different display modes:
+The first drop-box menu allows the user to switch between five available display modes:
 
 1) `Cortex3D`: the default display mode, which displays the whole cortex in 3D (Fig. 1).
 
@@ -117,7 +115,7 @@ The first drop-box menu allows the user to switch between different display mode
 </p>
 
 
-3) `Cortex3D_3view`: as 1., but display also in 2D the three sections through a desired voxel. To set the voxel, either point the mouse on the cortex and hit the "V" key, or enter the voxel coordinates in the text boxes (Fig. 3).
+3) `Cortex3D_3view`: as 1., but displays also the three sections through a desired voxel. To set the voxel, either point the mouse on the cortex and hit the "V" key, or enter the voxel coordinates in the text boxes (Fig. 3).
 
 <p align="left">
   <img src="Documents/Fig3.png" width="560">
@@ -147,25 +145,25 @@ The second drop-box menu allows to select the color scheme for the color map.
 
 Several additional controls are available, as listed in this table:
 
-| control | effect | apply to mode |
+| Control | Effect | Apply to mode |
 |:--------|:-------|:--------------|
 |   ▶    | switch between *Play* and *Pause* animation mode   |    all      |
-| Alpha   | ppacity of the cortex        |     all          |
+| Alpha   | opacity of the cortex        |     all          |
 | Global scale  | switch between *Global* and *Local* scaling        | all  |
 | Color scale   | non-linearity of the color map  | all               |
 | Display max   | set the sections through the voxel with maximum value       | 3., 5.            |
 
-NB: with *Global* scaling all frames are scaled to the maximum across all; with *Local* scaling each frame is scaled to its own maximum.
+NB: with *Global* scaling all frames are scaled to the maximum across all frames; with *Local* scaling each frame is scaled to its own maximum.
 
 > [!TIP] 
-> In addition to all the controls listed above, all the basic Makie interactions remain possible. In particular:
+> In addition to all the controls listed above, all the standard Makie controls are available. In particular:
 >
-> **2D plots:**
+> **2D plots**
 >
 > - *Primary mouse button click and Drag*: zoom in
 > - *CTRL + Primary mouse button click*: reset
 >
-> **3D plots:**
+> **3D plots**
 >
 > - *Primary mouse button click and Drag*: rotate
 > - *SHIFT + Primary mouse button click*: reset rotation
@@ -201,7 +199,7 @@ function cortex_plot(data :: Union{Vector{Real}, Matrix{Real}};
     `:cortex3D` (default), `:cortex3D_slice`, `:cortex3D_3view`, `:cortex2D_8view`, and `:cortex2D_3view`.
 - `title`: the title of the plot. 
 - `colorbar_label`: the label of the color bar. By default it is "current density squared module".
-- `fontsize`: the size of axies' font. Its default value (16.0) is the Makie's default value. 
+- `fontsize`: the size of the font for the axes. Its default value (16.0) is the Makie's default value. 
 
 
 [▲ index](#-index)
