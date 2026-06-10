@@ -4,24 +4,12 @@ function cortex2D_8view(brain,
                             colors_obs :: Observable,
                             alpha :: Observable,
                             global_scale :: Observable,
-                            scale_gamma :: Observable;
-                            colormap :: Symbol = :redsblues,
-                            datatype :: Symbol = :positive
-                            )
-    """
-    Args:
-    brain: the loaded .stl file
-    parent: the GridLayout where the cortex and sliders will be displayed
-    J: the data matrix/vector 
-    colors_obs: an observable containing a data vector which changes with the time 
-    alpha: an Observable containing the value used for the alpha parameter in mesh! 
-    global_scale: an observable containing either :global or :local which dictates if the scale used for the mesh is global or local
-    scale_gamma: an observable containing a float which allows the colorscale changes
-    colormap: the symbol of the used colormap for the mesh!
-    datatype: a symbol which is either :positive or :real depending on wether J contains only positive values or not
-
-    Displays 8 sectional views of the brain in 'parent' (a 3*3 GridLayout)
-    """
+                            scale_gamma :: Observable,
+                            colormap :: Observable;
+                        datatype :: Symbol = :positive,
+                        colorbar_label :: String = "Current density module",
+                        fontsize :: Real = 16.0
+                        )
     global eight_view_axis, eight_view_widgets, eight_view_lim_obs 
     pts = [p for tri in brain for p in tri]
 
@@ -35,23 +23,23 @@ function cortex2D_8view(brain,
     # - Definition of the sectional views -
     # (position in the grid, azimuth, elevation, section)
     views = [
-        (1,1,  0.0,   0.0,    section(lo_y, hi_y,  2), "AA"),
-        (2,1,  pi,   0.0,    section(0,    hi_y,  2), "AA"),
-        (3,1,  0.0,   pi/2,   section(lo_z, hi_z,  3), "AA"),
-        (1,2,  pi/2,  0.0,    section(lo_x, hi_x,  1), "AA"),
-        (2,2, -pi/2,  0.0,    section(lo_x, hi_x,  1), "AA"),
-        (1,3,  pi,    0.0,    section(lo_y, hi_y,  2), "AA"),
-        (2,3,  0.0,  0.0,    section(lo_y, 0,     2), "AA"),
-        (3,3,  0.0,  -pi/2,   section(lo_z, hi_z,  3), "AA"),
+        (1,1,  0.0,   0.0,    section(lo_y, hi_y,  2), "OR"),
+        (2,1,  pi,   0.0,    section(0,    hi_y,  2), "IL"),
+        (3,1,  0.0,   pi/2,   section(lo_z, hi_z,  3), "A"),
+        (1,2,  pi/2,  0.0,    section(lo_x, hi_x,  1), "F"),
+        (2,2, -pi/2,  0.0,    section(lo_x, hi_x,  1), "B"),
+        (1,3,  pi,    0.0,    section(lo_y, hi_y,  2), "OL"),
+        (2,3,  0.0,  0.0,    section(lo_y, 0,     2), "IR"),
+        (3,3,  0.0,  -pi/2,   section(lo_z, hi_z,  3), "U"),
     ]
     
     limits = global_scale[] ? Observable(get_limits(J, datatype=datatype)) : @lift get_limits($colors_obs, datatype=datatype)
     eight_view_lim_obs = limits
 
-    for (row, col, az, el, clip, text) in views
+    for (row, col, az, el, clip, texte) in views
         R  = make_view_rotation(az, el)
         rb = rotate_mesh_for_view(brain, R)   # pre-rotated mesh
-        clip = rotate_clip_planes(clip, R)      # clip planes in rotated space
+        clip = rotate_clip_planes(clip, R)    # clip planes in rotated space
 
         ax = Axis(parent[row, col], aspect = DataAspect(),
                 bottomspinevisible=false,
@@ -69,7 +57,7 @@ function cortex2D_8view(brain,
                 xticksvisible=false,
                 yticksvisible=false
                 )
-
+        
         mesh!(                #brain anatomy display
         ax,
         rb,
@@ -80,7 +68,7 @@ function cortex2D_8view(brain,
         )
         colors_rgba = @lift activation_rgba(
             $colors_obs,      # per-vertex activation values (already indexed by vertex_per_face)
-            colormap,           
+            $colormap,           
             $limits,
             midpoint = $scale_gamma
         )
@@ -92,35 +80,76 @@ function cortex2D_8view(brain,
             overdraw = true,
             clip_planes = clip  
         )
-
+        
         push!(eight_view_axis, ax)
+        text!(ax, texte, position = (1.0, 0.0), align = (:right, :bottom), space = :relative)
     end
 
-    legend1 = Label(parent[3, 2][1, 1], "Sorted from left to right and top to bottom:")
-    legend2 = Label(parent[3, 2][2, 1], "1:OR, 2:F, 3:OL, 4:IL, 5:B, 6:IR, 7:A, 8:U")
-    legend3 = Label(parent[3, 2][3, 1], "O=outside, I=inside, F=front, B=back")
-    legend4 = Label(parent[3, 2][4, 1], "A=above, U=under, L=left, R=right")
+    ax_text_legend_above = Axis(parent[3, 2][1,1],bottomspinevisible=false,
+                leftspinevisible=false,
+                rightspinevisible=false,
+                topspinevisible=false,
+                xgridvisible=false,
+                ygridvisible=false,
+                xminorgridvisible=false,
+                yminorgridvisible=false,
+                xminorticksvisible=false,
+                yminorticksvisible=false,
+                xticklabelsvisible=false,
+                yticklabelsvisible=false,
+                xticksvisible=false,
+                yticksvisible=false)
+    ax_text_legend_under = Axis(parent[3, 2][2,1],bottomspinevisible=false,
+                leftspinevisible=false,
+                rightspinevisible=false,
+                topspinevisible=false,
+                xgridvisible=false,
+                ygridvisible=false,
+                xminorgridvisible=false,
+                yminorgridvisible=false,
+                xminorticksvisible=false,
+                yminorticksvisible=false,
+                xticklabelsvisible=false,
+                yticklabelsvisible=false,
+                xticksvisible=false,
+                yticksvisible=false)
 
-    push!(eight_view_widgets, legend1, legend2, legend3, legend4)
+    text!(ax_text_legend_above, "O=outside, I=inside, F=front, B=back",position = (0.5, 0.0), align = (:center, :bottom), space = :relative)
+    text!(ax_text_legend_under, "A=above, U=under, L=left, R=right",position = (0.5, 1.0), align = (:center, :top), space = :relative)
+
+    push!(eight_view_axis, ax_text_legend_above, ax_text_legend_under)
 
     cb = Colorbar(parent[1:3, 4],
-            colormap   = Reverse(colormap),
-            colorrange = limits[],
-            label      = "Current density module",
+        colormap   = warped_cmap(colormap[], scale_gamma[]), 
+        colorrange = limits[],
+        label      = colorbar_label,
+        labelsize = fontsize,
+        ticksize = fontsize
     )
 
     on(limits, update=true) do lims #necessary to update the colorbar each time the scale is changed to global/local
         cb.colorrange = lims
     end
 
+    on(colormap, update=true) do cmap
+        cb.colormap = warped_cmap(cmap, scale_gamma[])
+    end
+
+    #use this to update the colorbar scale when scale_gamma is moved:
+    on(scale_gamma, update=true) do mid
+        cb.colormap = warped_cmap(colormap[], mid)
+    end
+
     push!(eight_view_widgets, cb)
 
 end
 
+
+"""
+Clears the 8 axis created by 'display_sections'. Puts the global back to 'nothing' if necessary.
+"""
 function clear_8view()
-    """
-    Clears the 8 axis created by 'display_sections'. Puts the global back to 'nothing' if necessary.
-    """
+    
     global eight_view_axis, eight_view_widgets, eight_view_lim_obs
 
     try;

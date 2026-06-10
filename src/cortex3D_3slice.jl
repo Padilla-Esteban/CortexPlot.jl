@@ -1,32 +1,18 @@
 # - Main Function -
 
 function cortex3D_3slice(brain,
-                    parent :: GridLayout, 
-                    J :: Union{Matrix{Float32}, Matrix{Float64}},
-                    colors_obs :: Observable,
-                    alpha :: Observable,
-                    global_scale :: Observable,
-                    scale_gamma :: Observable;
-                    colormap:: Symbol = :redsblues,
+                        parent :: GridLayout, 
+                        J :: Union{Matrix{Float32}, Matrix{Float64}},
+                        colors_obs :: Observable,
+                        alpha :: Observable,
+                        global_scale :: Observable,
+                        scale_gamma :: Observable,
+                        colormap:: Observable;
                     datatype :: Symbol = :positive,
+                    title :: String = "Brain activation",
+                    colorbar_label :: String = "Current density module",
                     fontsize :: Real = 16.0
                     )
-    """
-    Args:
-    brain: the loaded .stl file
-    parent: the GridLayout where the cortex and sliders will be displayed
-    J: the data matrix/vector 
-    colors_obs: an observable containing a data vector which changes with the time 
-    alpha: an Observable containing the value used for the alpha parameter in mesh! 
-    global_scale: an observable containing either :global or :local which dictates if the scale used for the mesh is global or local
-    scale_gamma: an observable containing a float which allows the colorscale changes
-    colormap: the symbol of the used colormap for the mesh!
-    datatype: a symbol which is either :positive or :real depending on wether J contains only positive values or not
-
-    Initializes the global variables used by the other functions of the file
-    Displays the brain model and the control blocks (slider, textEntry...)
-    Sets up the keyboard controls
-    """
     global three_slice_ax3d, three_slice_mesh, three_slice_cb, three_slice_coord_lbl
     global three_slice_widgets, three_slice_input_grid
     global three_slice_ax_nx, three_slice_ax_ny, three_slice_ax_nz, three_slice_parent
@@ -44,13 +30,13 @@ function cortex3D_3slice(brain,
     three_slice_parent =        parent
 
     # - Main 3D View -
-    three_slice_ax3d = Axis3(parent[1:3, 1], aspect = :data, title = "Brain activation",
+    three_slice_ax3d = Axis3(parent[1:3, 1], aspect = :data, title = title,
                         xlabelsize = fontsize,
                         ylabelsize = fontsize,
                         zlabelsize = fontsize,
                         xticklabelsize = fontsize,
                         yticklabelsize = fontsize,
-                        zticklabelsize = fontsize
+                        zticklabelsize = fontsize,
                         )
 
     #Calculating the limits of the colorscale
@@ -66,7 +52,7 @@ function cortex3D_3slice(brain,
     )
     colors_rgba = @lift activation_rgba(
         $colors_obs,      # per-vertex activation values (already indexed by vertex_per_face)
-        colormap,           
+        $colormap,           
         $limits,
         midpoint = $scale_gamma
     )
@@ -79,13 +65,24 @@ function cortex3D_3slice(brain,
     )
 
     three_slice_cb = Colorbar(parent[1:3, 2],
-            colormap   = Reverse(colormap),
-            colorrange = limits[],
-            label      = "Current density module",
-        )
+        colormap   = warped_cmap(colormap[], scale_gamma[]), 
+        colorrange = limits[],
+        label      = colorbar_label,
+        labelsize = fontsize,
+        ticksize = fontsize
+    )
 
     on(limits, update=true) do lims #necessary to update the colorbar each time the scale is changed to global/local
         three_slice_cb.colorrange = lims
+    end
+
+    on(colormap, update=true) do cmap
+        three_slice_cb.colormap = warped_cmap(cmap, scale_gamma[])
+    end
+
+    #use this to update the colorbar scale when scale_gamma is moved:
+    on(scale_gamma, update=true) do mid
+        three_slice_cb.colormap = warped_cmap(colormap[], mid)
     end
 
     three_slice_coord_lbl = Label(parent[4, 1:3],
@@ -141,7 +138,7 @@ function cortex3D_3slice(brain,
     on(events(f.scene).keyboardbutton) do event
         #setting up that pressing q (or a for azerty keyboards) does the same than entering coordinates and clicking the display button
         three_slice_mesh === nothing && return
-        (event.action == Keyboard.press && event.key == Keyboard.q) || return
+        (event.action == Keyboard.press && event.key == Keyboard.s) || return
         result = pick(f.scene, mouse_pos[][1], mouse_pos[][2])
         if result === nothing || result[1] !== three_slice_mesh
             three_slice_coord_lbl !== nothing && (three_slice_coord_lbl.text[] = "Mouse out of the brain.")
@@ -182,10 +179,11 @@ function display_3D_three_slice(brain, x, y, z, colors_obs, colormap, alpha, dat
     colsize!(three_slice_parent, 3, Auto())
 end
 
+
+"""
+Displays the slice located on "pos" along "axis" in a 3d axis
+"""
 function display_3D_slice(brain, axis, pos, thickness, cell, title, colors_obs, colormap, alpha, datatype, limits, scale_gamma)
-    """
-    Displays the slice located on "pos" along "axis" in a 3d axis
-    """
     pts = [p for tri in brain for p in tri]
     slab = make_3D_slab(pos, abs(axis), thickness, pts)
     ax = Axis3(cell, aspect = :data,
@@ -217,7 +215,7 @@ function display_3D_slice(brain, axis, pos, thickness, cell, title, colors_obs, 
     )
     colors_rgba = @lift activation_rgba(
         $colors_obs,      # per-vertex activation values (already indexed by vertex_per_face)
-        colormap,           
+        $colormap,           
         $limits,
         midpoint = $scale_gamma
     )
@@ -235,10 +233,12 @@ function display_3D_slice(brain, axis, pos, thickness, cell, title, colors_obs, 
     return ax
 end
 
+
+"""
+Claims the mouse coordinates, displays them in the Labels and returns them 
+"""
 function claim_coordinates(plt, idx)
-    """
-    Claims the mouse coordinates, displays them in the Labels and returns them 
-    """
+    
     mesh_data = plt[1][]
     pos     = mesh_data.position
     idx > length(pos) && return 0f0, 0f0, 0f0
@@ -249,11 +249,12 @@ function claim_coordinates(plt, idx)
 end
 
 
+"""
+Clears everything created by the functions above (meshes, Labels, sliders...)
+Puts global variables back to nothing if needed
+"""
 function clear_3slice()
-    """
-    Clears everything created by the functions above (meshes, Labels, sliders...)
-    Puts global variables back to nothing if needed
-    """
+    
     global three_slice_ax3d, three_slice_mesh, three_slice_cb, three_slice_coord_lbl
     global three_slice_widgets, three_slice_input_grid
     global three_slice_ax_nx, three_slice_ax_ny, three_slice_ax_nz, three_slice_parent

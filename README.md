@@ -84,6 +84,8 @@ The package exports only two functions:
 function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
                         voxels :: Int64 = 2503,
                         alpha :: Real = 1.0,
+                        title :: String = "Brain activation",
+                        colorbar_label :: String = "Current density module",
                         fontsize :: Real = 16.0
                         )where {A<:Real}
 ```
@@ -95,6 +97,8 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
 **Optional Keyword Arguments**
 - `voxels`: the number of voxels p in the head model. It can be `2503` or `5002`. 
 - `alpha`: the starting value of alpha for the display. 
+- `title`: sets the title of the plots. 
+- `colorbar_label`: sets the title of the colorbars. 
 - `fontsize`: the size of the plot's ticks. Its default value (16.0) is the Makie's default value.  
 
 **Display**
@@ -121,10 +125,12 @@ Some controllers are common to all the display modes:
 
 ```julia
 function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
-                        voxels :: Int64 = 2503,
-                        alpha :: Real = 1.0,
-                        mode :: Symbol = :cortex3D,
-                        fontsize :: Real = 16.0)where {A<:Real}
+                    voxels :: Int64 = 2503,
+                    alpha :: Real = 1.0,
+                    mode :: Symbol = :cortex3D,
+                    title :: String = "Brain activation",
+                    colorbar_label :: String = "Current density module",
+                    fontsize :: Real = 16.0)where {A<:Real}
 ```
 
 **Argument**
@@ -135,6 +141,8 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
 - `voxels`: the number of voxels p in the head model. It can be `2503` or `5002`. 
 - `alpha`: the starting value of alpha for the display. 
 - `mode`: a symbol that tells the function which display mode the user wants.
+- `title`: sets the title of the plots. 
+- `colorbar_label`: sets the title of the colorbars. 
 - `fontsize`: the size of the plot's ticks. Its default value (16.0) is the Makie's default value.  
 
 **Display**

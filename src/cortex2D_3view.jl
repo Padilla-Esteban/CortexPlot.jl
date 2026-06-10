@@ -1,32 +1,16 @@
 # - Main Function -
 function cortex2D_3view(brain,
-                        parent :: GridLayout, 
-                        J :: Union{Matrix{Float32}, Matrix{Float64}},
-                        colors_obs :: Observable,
-                        alpha :: Observable,
-                        global_scale :: Observable,
-                        scale_gamma :: Observable;
-                        colormap :: Symbol = :redsblues,
+                            parent :: GridLayout, 
+                            J :: Union{Matrix{Float32}, Matrix{Float64}},
+                            colors_obs :: Observable,
+                            alpha :: Observable,
+                            global_scale :: Observable,
+                            scale_gamma :: Observable,
+                            colormap :: Observable;
                         datatype :: Symbol = :positive,
+                        colorbar_label :: String = "Current density module",
                         fontsize :: Real = 16.0
                         )
-    """
-    Args:
-    brain: the loaded .stl file
-    parent: the GridLayout where the cortex and sliders will be displayed
-    J: the data matrix/vector 
-    colors_obs: an observable containing a data vector which changes with the time 
-    alpha: an Observable containing the value used for the alpha parameter in mesh! 
-    global_scale: an observable containing either :global or :local which dictates if the scale used for the mesh is global or local
-    scale_gamma: an observable containing a float which allows the colorscale changes
-    colormap: the symbol of the used colormap for the mesh!
-    datatype: a symbol which is either :positive or :real depending on wether J contains only positive values or not
-
-    Makes the sliders and buttons appear in `parent`.
-    Initializes the global variables used by the other functions of the file
-    Calls the function display_2D_3slices a first time to display the (0,0,0) slices
-    Then sets up the controls 
-    """
     global three_view_ax_nx, three_view_ax_ny, three_view_ax_nz
     global three_view_axis, three_view_parent, three_view_widgets
     global three_view_pos_x, three_view_pos_y, three_view_pos_z
@@ -43,14 +27,14 @@ function cortex2D_3view(brain,
     three_view_pos_x = Observable(0.0f0)
     three_view_pos_y = Observable(0.0f0)
     three_view_pos_z = Observable(0.0f0)
-    three_view_thick_x = Observable(5.0f0)
-    three_view_thick_y = Observable(5.0f0)
-    three_view_thick_z = Observable(5.0f0)
+    three_view_thick_x = Observable(10.0f0)
+    three_view_thick_y = Observable(10.0f0)
+    three_view_thick_z = Observable(10.0f0)
 
     limits = global_scale[] ? Observable(get_limits(J, datatype=datatype)) : @lift get_limits($colors_obs, datatype=datatype)   
     three_view_lim_obs = limits 
 
-    display_2D_3slices(brain, 0.0f0, 0.0f0, 0.0f0, colors_obs, alpha, colormap, datatype, limits, scale_gamma, fontsize)
+    display_2D_3slices(brain, 0.0f0, 0.0f0, 0.0f0, colors_obs, alpha, colormap, datatype, limits, scale_gamma, colorbar_label, fontsize)
     
     pts = [p for tri in brain for p in tri]
 
@@ -108,7 +92,7 @@ function cortex2D_3view(brain,
         pos = brain.position
         pt = pos[index]
         x, y, z = Float32(pt[1]), Float32(pt[2]), Float32(pt[3])
-        display_2D_3slices(brain, x, y, z, colors_obs, alpha, colormap, datatype, limits, scale_gamma, fontsize)
+        display_2D_3slices(brain, x, y, z, colors_obs, alpha, colormap, datatype, limits, scale_gamma, colorbar_label, fontsize)
         max_coord_lbl.text[] = @sprintf("x = %.3f  |  y = %.3f  |  z = %.3f", x, y, z)
         set_close_to!(sl_x, x)
         set_close_to!(sl_y, y)
@@ -119,11 +103,12 @@ end
 
 # - Side Functions -
 
-function display_2D_3slices(brain, x, y, z, colors_obs, alpha, colormap, datatype, limits, scale_gamma, fontsize)
-    """
-    Clears the axis if some slices were already displayed
-    Then calls the function that displays a slice 3 times (one per axis)
-    """
+"""
+Clears the axis if some slices were already displayed
+Then calls the function that displays a slice 3 times (one per axis)
+"""
+function display_2D_3slices(brain, x, y, z, colors_obs, alpha, colormap, datatype, limits, scale_gamma, colorbar_label, fontsize)
+    
     global three_view_axis, three_view_ax_nx, three_view_ax_ny, three_view_ax_nz, three_view_parent
     global three_view_pos_x, three_view_pos_y, three_view_pos_z, three_view_thick_x, three_view_thick_y, three_view_thick_z
 
@@ -138,17 +123,19 @@ function display_2D_3slices(brain, x, y, z, colors_obs, alpha, colormap, datatyp
     three_view_pos_y[] = y
     three_view_pos_z[] = z
 
-    three_view_ax_nx = display_2D_slice(brain, 1, three_view_pos_x, three_view_thick_x, three_view_parent[2, 1], " x-normal slice", colors_obs, alpha, colormap, datatype, limits, scale_gamma, fontsize)
-    three_view_ax_ny = display_2D_slice(brain, 2, three_view_pos_y, three_view_thick_y, three_view_parent[2, 2], "y-normal slice", colors_obs, alpha, colormap, datatype, limits, scale_gamma, fontsize)
-    three_view_ax_nz = display_2D_slice(brain, 3, three_view_pos_z, three_view_thick_z, three_view_parent[2, 3], "z-normal slice", colors_obs, alpha, colormap, datatype, limits, scale_gamma, fontsize)
+    three_view_ax_nx = display_2D_slice(brain, 1, three_view_pos_x, three_view_thick_x, three_view_parent[2, 1], " x-normal slice", colors_obs, alpha, colormap, datatype, limits, scale_gamma, colorbar_label, fontsize)
+    three_view_ax_ny = display_2D_slice(brain, 2, three_view_pos_y, three_view_thick_y, three_view_parent[2, 2], "y-normal slice", colors_obs, alpha, colormap, datatype, limits, scale_gamma, colorbar_label, fontsize)
+    three_view_ax_nz = display_2D_slice(brain, 3, three_view_pos_z, three_view_thick_z, three_view_parent[2, 3], "z-normal slice", colors_obs, alpha, colormap, datatype, limits, scale_gamma, colorbar_label, fontsize)
 
 
 end
 
-function display_2D_slice(brain, axis, pos_obs, thick_obs, cell, title, colors_obs, alpha, colormap, datatype, limits, scale_gamma, fontsize)
-    """
-    Displays the slice located on "pos" along "axis" in a 2d axis
-    """
+
+"""
+Displays the slice located on "pos" along "axis" in a 2d axis
+"""
+function display_2D_slice(brain, axis, pos_obs, thick_obs, cell, title, colors_obs, alpha, colormap, datatype, limits, scale_gamma, colorbar_label, fontsize)
+   
     global three_view_parent, three_view_axis, three_view_widgets
 
     azimuth   = axis == 1 ? pi/2  : axis == 2 ? 0.0 : 0.0
@@ -181,7 +168,7 @@ function display_2D_slice(brain, axis, pos_obs, thick_obs, cell, title, colors_o
     )
     colors_rgba = @lift activation_rgba(
         $colors_obs,      # per-vertex activation values (already indexed by vertex_per_face)
-        colormap,           
+        $colormap,           
         $limits,
         midpoint = $scale_gamma
     )
@@ -195,27 +182,40 @@ function display_2D_slice(brain, axis, pos_obs, thick_obs, cell, title, colors_o
     )
 
     if axis == 3
-        cb = Colorbar(three_view_parent[2, 4],
-            colormap   = Reverse(colormap),
+        cb = Colorbar(three_view_parent[2, 4][1, 2],
+            colormap   = warped_cmap(colormap[], scale_gamma[]), 
             colorrange = limits[],
-            label      = "Current density module",
+            label      = colorbar_label,
+            labelsize = fontsize,
+            ticksize = fontsize
         )
-        push!(three_view_widgets, cb)
 
-        on(limits, update=true) do lims
+        on(limits, update=true) do lims #necessary to update the colorbar each time the scale is changed to global/local
             cb.colorrange = lims
         end
+
+        on(colormap, update=true) do cmap
+            cb.colormap = warped_cmap(cmap, scale_gamma[])
+        end
+
+        #use this to update the colorbar scale when scale_gamma is moved:
+        on(scale_gamma, update=true) do mid
+            cb.colormap = warped_cmap(colormap[], mid)
+        end
+
+        push!(three_view_widgets, cb)
     end
 
     return ax
 end
 
 
+"""
+Clears everything created by the functions above
+Puts global variables back to 'nothing' if needed
+"""
 function clear_3view()
-    """
-    Clears everything created by the functions above
-    Puts global variables back to 'nothing' if needed
-    """
+    
     global three_view_axis, three_view_widgets, three_view_parent
     global three_view_ax_nx, three_view_ax_ny, three_view_ax_nz
     global three_view_lim_obs
