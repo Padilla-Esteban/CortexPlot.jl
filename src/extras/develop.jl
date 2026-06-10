@@ -2,7 +2,7 @@
 #   It allows to build the package locally from the source code,
 #   without actually installing the package.
 #   You won't need this script for using the package.
-#   MUST USE JULIA V1.11.6 OR MUST DELETE THE MANIFEST.YOML FILE AND 
+#   NB: YOU MUST USE JULIA V1.12.4 OR MUST DELETE THE MANIFEST.TOML FILE AND 
 #   REACTIVATE THE ENVIRONMENT WITH: using Pkg; Pkg.activate("."); Pkg.instantiate()
 #
 #   MIT License
