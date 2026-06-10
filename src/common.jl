@@ -1,27 +1,29 @@
+"""
+ax: axis along which we want to find the range
+pts: array containing all the points of the brain model 
+
+Returns the position of the extrema points of the brain along the axis ax.
+"""
 function get_range(ax :: Int,
                     pts :: Vector{Point{3, Float32}})
-    """
-    ax: axis along which we want to find the range
-    pts: array containing all the points of the brain model 
-
-    Returns the position of the extrema points of the brain along the axis ax.
-    """
+    
     return (minimum(p[ax] for p in pts), maximum(p[ax] for p in pts))
 end
 
+
+"""
+pos: position of the center of the wanted slab along the axis ax
+ax: axis normal to the wanted slab (1 for x, 2 for y, 3 for z)
+thickness: thickness of the wanted slab
+pts: array containing all the points of the brain model 
+Returns a couple of parallel planes located in pos-thickness/2 and pos+thickness/2 along the axis ax
+The couple of planes can then be used as clip_planes in a mesh! call 
+to mesh a section of the brain located between the two planes.
+"""
 function make_3D_slab(pos :: Real, 
                         ax:: Int, 
                         thickness :: Real, 
-                        pts :: Vector{Point{3, Float32}})
-    """
-    pos: position of the center of the wanted slab along the axis ax
-    ax: axis normal to the wanted slab (1 for x, 2 for y, 3 for z)
-    thickness: thickness of the wanted slab
-    pts: array containing all the points of the brain model 
-    Returns a couple of parallel planes located in pos-thickness/2 and pos+thickness/2 along the axis ax
-    The couple of planes can then be used as clip_planes in a mesh! call 
-    to mesh a section of the brain located between the two planes.
-    """
+                        pts :: Vector{Point{3, Float32}})    
     ranges     = [get_range(i, pts) for i in 1:3]
     centers    = [(lo + hi) / 2f0 for (lo, hi) in ranges]
     half_exts  = [(hi - lo) / 2f0 for (lo, hi) in ranges]
@@ -37,25 +39,27 @@ function make_3D_slab(pos :: Real,
             Plane3f(-normal, -(pos_n + half_n))]
 end
 
+
+"""
+Does the same thing than make_3D_slab but for Axis objects (2D) instead of Axis3 objects (3D)
+"""
 function make_2D_slab(pos :: Real, 
                         ax :: Int, 
-                        thickness :: Real)
-    """
-    Does the same thing than make_3D_slab but for Axis objects (2D) instead of Axis3 objects (3D)
-    """
+                        thickness :: Real)   
     half   = thickness / 2
     normal = ax == 1 ? Vec3f(1,0,0) : ax == 2 ? Vec3f(0,1,0) : Vec3f(0,0,1)
     return [Plane3f( normal,  pos - half),   # show where axis_coord >= pos-half
             Plane3f(-normal, -(pos + half))] # show where axis_coord <= pos+half
 end
 
-function section(start :: Real, 
-                    stop :: Real, 
-                    axis :: Int)
-    """
+
+"""
     Returns two 'Plane3f' defining a section between 'start' and 'stop'
     along 'axis' (1=X, 2=Y, 3=Z). The 'axis' sign inverts the normal vector.
     """
+function section(start :: Real, 
+                    stop :: Real, 
+                    axis :: Int)
     normal = abs(axis) == 1 ? Vec3f(1,0,0) :
              abs(axis) == 2 ? Vec3f(0,1,0) :
                              Vec3f(0,0,1)
@@ -65,12 +69,12 @@ function section(start :: Real,
 end
 
 
+"""
+Returns a 3×3 Float32 rotation matrix that maps world-space → camera-space
+to match Makie's Axis3 azimuth/elevation convention.
+"""
 function make_view_rotation(azimuth :: Real, 
                             elevation :: Real)
-    """
-    Returns a 3×3 Float32 rotation matrix that maps world-space → camera-space
-    to match Makie's Axis3 azimuth/elevation convention.
-    """
     az = Float64(azimuth)
     el = Float64(elevation)
 
@@ -91,49 +95,51 @@ function make_view_rotation(azimuth :: Real,
                    -fwd[1]  -fwd[2]  -fwd[3] ]
 end
 
+
+
+"""
+New mesh whose vertices are `R * p` for every original vertex `p`.
+Face connectivity is unchanged, so per-vertex colours still line up.
+"""
 function rotate_mesh_for_view(mesh3d, 
                             R :: Matrix{Float32})
-    """
-    New mesh whose vertices are `R * p` for every original vertex `p`.
-    Face connectivity is unchanged, so per-vertex colours still line up.
-    """
     pts     = decompose(Point3f, mesh3d)
     new_pts = Point3f[Point3f(R * Float32[p[1], p[2], p[3]]) for p in pts]
     fs      = decompose(TriangleFace{Int}, mesh3d)
     return GeometryBasics.Mesh(new_pts, fs)
 end
 
+
+"""
+Rotate plane normals by `R`; distances are invariant under rotation
+(because dot(Rn, Rp) = dot(n, p) for orthogonal R).
+"""
 function rotate_clip_planes(planes :: Vector{Plane3f}, 
                             R :: Matrix{Float32})
-    """
-    Rotate plane normals by `R`; distances are invariant under rotation
-    (because dot(Rn, Rp) = dot(n, p) for orthogonal R).
-    """
     [Plane3f(Vec3f(R * [p.normal[1], p.normal[2], p.normal[3]]), p.distance)
      for p in planes]
 end
 
 
+"""
+Convert a vector of per-vertex activation values into RGBA colors, where the
+RGB channels are determined by a colormap and the alpha channel encodes the
+activation strength (0 = fully transparent, 1 = fully opaque).
+
+This is intended to be used as an overlay on top of a uniform gray anatomy mesh:
+low-activation vertices will appear transparent (revealing the gray underneath),
+while high-activation vertices will appear as the corresponding colormap color.
+
+Args:
+values: per-vertex activation values 
+cmap_name: name of the colormap to use
+vmin: minimum value of the activation range (used for normalization)
+vmax: maximum value of the activation range (used for normalization)
+
+Returns:
+A Vector{RGBAf} of length length(values), one RGBA color per vertex.
+"""
 function activation_rgba(values, cmap_name, limits; midpoint=0.5f0)
-    """
-    Convert a vector of per-vertex activation values into RGBA colors, where the
-    RGB channels are determined by a colormap and the alpha channel encodes the
-    activation strength (0 = fully transparent, 1 = fully opaque).
-
-    This is intended to be used as an overlay on top of a uniform gray anatomy mesh:
-    low-activation vertices will appear transparent (revealing the gray underneath),
-    while high-activation vertices will appear as the corresponding colormap color.
-
-    Args:
-    values: per-vertex activation values 
-    cmap_name: name of the colormap to use
-    vmin: minimum value of the activation range (used for normalization)
-    vmax: maximum value of the activation range (used for normalization)
-
-    Returns:
-    A Vector{RGBAf} of length length(values), one RGBA color per vertex.
-    """
-
     vmin = limits[1]
     vmax = limits[2]
     # Normalize values to [0, 1] relative to the activation range.

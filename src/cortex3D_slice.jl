@@ -1,28 +1,14 @@
-"""
-Args:
-brain: the loaded .stl file
-parent: the GridLayout where the cortex and sliders will be displayed
-alpha: an Observable containing the value used for the alpha parameter in mesh! 
-J: the data matrix/vector 
-colors_obs: an observable containing a data vector which changes with the time 
-global_scale: an observable containing either :global or :local which dictates if the scale used for the mesh is global or local
-scale_gamma: an observable containing a float which allows the colorscale changes
-colormap: the symbol of the used colormap for the mesh!
-datatype: a symbol which is either :positive or :real depending on wether J contains only positive values or not
-
-Makes the sliders and buttons of the slicing view mode appear in `parent`.
-Initializes the global variables used by the other functions of the file
-Then calls the function display_moving_slice 
-"""
 function cortex3D_slice(brain,
                         parent :: GridLayout, 
                         alpha :: Observable,
                         J :: Union{Matrix{Float32}, Matrix{Float64}},
                         colors_obs :: Observable,
                         global_scale :: Observable,
-                        scale_gamma :: Observable;
-                    colormap :: Symbol = :redsblues,
+                        scale_gamma :: Observable,
+                    colormap :: Observable;
                     datatype :: Symbol = :positive,
+                    title :: String = "Brain activation",
+                    colorbar_label :: String = "Current density module",
                     fontsize :: Real = 16.0)
     global moving_slice_blocks, moving_slice_buttons, moving_slice_pos, moving_slice_axis, moving_slice_thick
     global moving_slice_lim_obs
@@ -33,7 +19,7 @@ function cortex3D_slice(brain,
     defil_keyboard = nothing   # Observer to be able to disconnect keyboard
     moving_slice_pos  = Observable(0.5f0)      #Observable referring to the position of the slab
     moving_slice_axis   = Observable(1)          #Observable referring to the axis followed by the slab
-    moving_slice_thick = Observable(1.0f0)    #Observable referring to the thickness of the slab
+    moving_slice_thick = Observable(10.0f0)    #Observable referring to the thickness of the slab
 
     moving_slice_lim_obs = nothing #Used to avoid creating the same variable multiple times
 
@@ -55,7 +41,7 @@ function cortex3D_slice(brain,
     lbl_pos_var = Label(ctrl[1, 3], @lift("$(round($moving_slice_pos, digits=3))"), width = 50)
 
     lbl_thick     = Label(ctrl[2, 1], "Thickness")
-    sl_thick      = Slider(ctrl[2, 2], range = 0:0.005:150, startvalue = 1)
+    sl_thick      = Slider(ctrl[2, 2], range = 0:0.005:150, startvalue = moving_slice_thick[])
     connect!(moving_slice_thick, sl_thick.value)
     lbl_thick_var = Label(ctrl[2, 3], @lift("$(round($moving_slice_thick, digits=3))"), width = 50)
 
@@ -71,15 +57,15 @@ function cortex3D_slice(brain,
     moving_slice_blocks = [lbl_pos, lbl_pos_var, lbl_thick, lbl_thick_var, sl_pos, sl_thick] 
 
     # - 3D view -
-    display_moving_slice(brain, parent, pts, sl_pos, sl_thick, colormap, J, colors_obs, global_scale, scale_gamma, alpha, datatype, fontsize)
+    display_moving_slice(brain, parent, pts, sl_pos, sl_thick, colormap, J, colors_obs, global_scale, scale_gamma, alpha, datatype, title, colorbar_label, fontsize)
 end
 
 # - 3D view construction -
-function display_moving_slice(brain, parent, pts, sl_pos, sl_thick, colormap, J, colors_obs, global_scale, scale_gamma, alpha, datatype, fontsize)
+function display_moving_slice(brain, parent, pts, sl_pos, sl_thick, colormap, J, colors_obs, global_scale, scale_gamma, alpha, datatype, title, colorbar_label, fontsize)
     global moving_slice_blocks, defil_keyboard, moving_slice_pos, moving_slice_axis, moving_slice_thick
     global moving_slice_lim_obs
 
-    ax3d = Axis3(parent[1, 1], aspect = :data, title = "Brain — sectional view",
+    ax3d = Axis3(parent[1, 1], aspect = :data, title = title,
                     xlabelsize = fontsize,
                     ylabelsize = fontsize,
                     zlabelsize = fontsize,
@@ -105,7 +91,7 @@ function display_moving_slice(brain, parent, pts, sl_pos, sl_thick, colormap, J,
     )
     colors_rgba = @lift activation_rgba(
         $colors_obs,        # per-vertex activation values (already indexed by vertex_per_face)
-        colormap,           
+        $colormap,           
         $limits,
         midpoint = $scale_gamma
     )
@@ -119,13 +105,24 @@ function display_moving_slice(brain, parent, pts, sl_pos, sl_thick, colormap, J,
     )
 
     cb = Colorbar(parent[1, 2],
-            colormap   = Reverse(colormap),
-            colorrange = limits[],
-            label      = "Current density module"
-        )
+        colormap   = warped_cmap(colormap[], scale_gamma[]), 
+        colorrange = limits[],
+        label      = colorbar_label,
+        labelsize = fontsize,
+        ticksize = fontsize
+    )
 
     on(limits, update=true) do lims #necessary to update the colorbar each time the scale is changed to global/local
         cb.colorrange = lims
+    end
+
+    on(colormap, update=true) do cmap
+        cb.colormap = warped_cmap(cmap, scale_gamma[])
+    end
+
+    #use this to update the colorbar scale when scale_gamma is moved:
+    on(scale_gamma, update=true) do mid
+        cb.colormap = warped_cmap(colormap[], mid)
     end
 
     push!(moving_slice_blocks, ax3d) #Adding the axis and colorbar to the list of blocks
@@ -151,21 +148,22 @@ function display_moving_slice(brain, parent, pts, sl_pos, sl_thick, colormap, J,
         #Setting up the keyboard keys that change the axis followed by the slice
         elseif event.key == Keyboard.x;  moving_slice_axis[] = 1
         elseif event.key == Keyboard.y;  moving_slice_axis[] = 2
-        elseif event.key == Keyboard.w;  moving_slice_axis[] = 3
+        elseif event.key == Keyboard.w || event.key == Keyboard.z;  moving_slice_axis[] = 3
 
         #Setting up the keyboard keys that control the thickness of the slab
         elseif event.key == Keyboard.equal
             set_close_to!(sl_thick, clamp(moving_slice_thick[] + 1.0f0, 0f0, 150f0))
-        elseif event.key == Keyboard.minus
+        elseif event.key == Keyboard.minus || event.key == Keyboard._6
             set_close_to!(sl_thick, clamp(moving_slice_thick[] - 1.0f0, 0f0, 150f0))
         end
     end
 end
 
+
+"""
+Disconnects the keyboard navigation and clears the blocks created by `init_defil`.
+"""
 function clear_moving_slice()
-    """
-    Disconnects the keyboard navigation and clears the blocks created by `init_defil`.
-    """
     global moving_slice_blocks, moving_slice_buttons, defil_keyboard
     global moving_slice_lim_obs
 
