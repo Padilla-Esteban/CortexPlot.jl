@@ -46,7 +46,7 @@ Execute the following command in julia's REPL:
 
 ```julia
 using Pkg
-Pkg.add(CortexPlot)
+Pkg.add(url="https://github.com/Marco-Congedo/CortexPlot.jl")
 ```
 
 
