@@ -35,8 +35,18 @@ function cortex3D_display(brain,
                         )
     global cortex3D_ax3d, cortex3D_cb
 
-    limits = global_scale[] ? Observable(get_limits(J, datatype=datatype)) : @lift get_limits($colors_obs, datatype=datatype)
+    limits = Observable(get_limits(J, datatype=datatype))
 
+    on(global_scale, update=true) do is_global
+        limits[] = is_global ? get_limits(J, datatype=datatype) :
+                               get_limits(colors_obs[], datatype=datatype)
+    end
+
+    on(colors_obs) do cols
+        if !global_scale[]
+            limits[] = get_limits(cols, datatype=datatype)
+        end
+    end
 
     cortex3D_ax3d = Axis3(parent[1, 1], aspect = :data, title = title,
                             xlabelsize = fontsize,
@@ -76,11 +86,6 @@ function cortex3D_display(brain,
         labelsize = fontsize,
         ticksize = fontsize
     )
-
-    on(global_scale, update=true) do scale
-        limits = scale ? Observable(get_limits(J, datatype=datatype)) : @lift get_limits($colors_obs, datatype=datatype)
-        cortex3D_cb.colorrange = limits[]
-    end
 
     on(limits, update=true) do lims #necessary to update the colorbar each time the scale is changed to global/local
         cortex3D_cb.colorrange = lims

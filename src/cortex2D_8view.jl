@@ -10,7 +10,7 @@ function cortex2D_8view(brain,
                         colorbar_label :: String = "Current density module",
                         fontsize :: Real = 16.0
                         )
-    global eight_view_axis, eight_view_widgets, eight_view_lim_obs 
+    global eight_view_axis, eight_view_widgets
     pts = [p for tri in brain for p in tri]
 
     lo_x, hi_x = get_range(1, pts)
@@ -33,8 +33,18 @@ function cortex2D_8view(brain,
         (3,3,  0.0,  -pi/2,   section(lo_z, hi_z,  3), "U"),
     ]
     
-    limits = global_scale[] ? Observable(get_limits(J, datatype=datatype)) : @lift get_limits($colors_obs, datatype=datatype)
-    eight_view_lim_obs = limits
+    limits = Observable(get_limits(J, datatype=datatype))
+
+    on(global_scale, update=true) do is_global
+        limits[] = is_global ? get_limits(J, datatype=datatype) :
+                               get_limits(colors_obs[], datatype=datatype)
+    end
+
+    on(colors_obs) do cols
+        if !global_scale[]
+            limits[] = get_limits(cols, datatype=datatype)
+        end
+    end
 
     for (row, col, az, el, clip, texte) in views
         R  = make_view_rotation(az, el)
@@ -150,7 +160,7 @@ Clears the 8 axis created by 'display_sections'. Puts the global back to 'nothin
 """
 function clear_8view()
     
-    global eight_view_axis, eight_view_widgets, eight_view_lim_obs
+    global eight_view_axis, eight_view_widgets
 
     try;
     for ax in eight_view_axis
@@ -162,12 +172,6 @@ function clear_8view()
     for w in eight_view_widgets
         try; delete!(w); catch; end
     end
-
-    if eight_view_lim_obs !== nothing
-        empty!(eight_view_lim_obs.listeners)  
-        eight_view_lim_obs = nothing
-    end
-
     catch;
     end
 end
