@@ -45,6 +45,14 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
     time_lbl = Label(f[1, 1][3, 1][1, 3], "Frame:")
     time_lbl_val = Label(f[1, 1][3, 1][1,4], @lift("$($t_idx)"), width = 50)
 
+    if event.key == Keyboard.left
+        t_idx[] = mod1(t_idx[] - 1, T)
+        set_close_to!(time_sl, t_idx[])
+    elseif event.key == Keyboard.right
+        t_idx[] = mod1(t_idx[] + 1, T)
+        set_close_to!(time_sl, t_idx[])
+    end
+
     # - Alpha slider - 
     lbl_global_alpha    = Label(f[1, 1][3, 2][1, 1],  "Alpha")
     sl_global_alpha      = Slider(f[1, 1][3, 2][1, 2], range = 0:0.1:1, startvalue = alpha)
@@ -180,6 +188,14 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
     connect!(t_idx, time_sl.value)
     time_lbl = Label(f[1, 1][3, 1][1, 3], "Frame:")
     time_lbl_val = Label(f[1, 1][3, 1][1,4], @lift("$($t_idx)"), width = 50)
+
+    if event.key == Keyboard.left
+        t_idx[] = mod1(t_idx[] - 1, T)
+        set_close_to!(time_sl, t_idx[])
+    elseif event.key == Keyboard.right
+        t_idx[] = mod1(t_idx[] + 1, T)
+        set_close_to!(time_sl, t_idx[])
+    end
 
     lbl_global_alpha    = Label(f[1, 1][3, 2][1, 1],  "Alpha")
     sl_global_alpha      = Slider(f[1, 1][3, 2][1, 2], range = 0:0.1:1, startvalue = alpha)

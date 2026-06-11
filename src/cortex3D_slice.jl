@@ -145,9 +145,9 @@ function display_moving_slice(brain, parent, pts, sl_pos, sl_thick, colormap, J,
         lo_k, hi_k = get_range(moving_slice_axis[], pts)
 
         #Setting up the keyboard keys that control the slice movement
-        if     event.key == Keyboard.right || event.key == Keyboard.up
+        if     event.key == Keyboard.up
             set_close_to!(sl_pos, clamp(moving_slice_pos[] + step, Float32(lo_k), Float32(hi_k)))
-        elseif event.key == Keyboard.left  || event.key == Keyboard.down
+        elseif event.key == Keyboard.down
             set_close_to!(sl_pos, clamp(moving_slice_pos[] - step, Float32(lo_k), Float32(hi_k)))
 
         #Setting up the keyboard keys that change the axis followed by the slice
