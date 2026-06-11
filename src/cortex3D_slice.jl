@@ -11,8 +11,6 @@ function cortex3D_slice(brain,
                     colorbar_label :: String = "Current density module",
                     fontsize :: Real = 16.0)
     global moving_slice_blocks, moving_slice_buttons, moving_slice_pos, moving_slice_axis, moving_slice_thick
-    global moving_slice_lim_obs
-
     
     moving_slice_blocks   = nothing   # labels, sliders, ax3d, colorbar
     moving_slice_buttons  = nothing   # axis buttons
@@ -20,8 +18,6 @@ function cortex3D_slice(brain,
     moving_slice_pos  = Observable(0.5f0)      #Observable referring to the position of the slab
     moving_slice_axis   = Observable(1)          #Observable referring to the axis followed by the slab
     moving_slice_thick = Observable(10.0f0)    #Observable referring to the thickness of the slab
-
-    moving_slice_lim_obs = nothing #Used to avoid creating the same variable multiple times
 
     pts = [p for tri in brain for p in tri]
 
@@ -41,7 +37,7 @@ function cortex3D_slice(brain,
     lbl_pos_var = Label(ctrl[1, 3], @lift("$(round($moving_slice_pos, digits=3))"), width = 50)
 
     lbl_thick     = Label(ctrl[2, 1], "Thickness")
-    sl_thick      = Slider(ctrl[2, 2], range = 0:0.005:150, startvalue = moving_slice_thick[])
+    sl_thick      = Slider(ctrl[2, 2], range = 0:0.005:170, startvalue = moving_slice_thick[])
     connect!(moving_slice_thick, sl_thick.value)
     lbl_thick_var = Label(ctrl[2, 3], @lift("$(round($moving_slice_thick, digits=3))"), width = 50)
 
@@ -63,7 +59,6 @@ end
 # - 3D view construction -
 function display_moving_slice(brain, parent, pts, sl_pos, sl_thick, colormap, J, colors_obs, global_scale, scale_gamma, alpha, datatype, title, colorbar_label, fontsize)
     global moving_slice_blocks, defil_keyboard, moving_slice_pos, moving_slice_axis, moving_slice_thick
-    global moving_slice_lim_obs
 
     ax3d = Axis3(parent[1, 1], aspect = :data, title = title,
                     xlabelsize = fontsize,
@@ -78,8 +73,18 @@ function display_moving_slice(brain, parent, pts, sl_pos, sl_thick, colormap, J,
     clip = @lift(make_3D_slab($moving_slice_pos, $moving_slice_axis, $moving_slice_thick, pts))
 
     #Calculating the limits of the colorscale
-    limits = global_scale[] ? Observable(get_limits(J, datatype=datatype)) : @lift get_limits($colors_obs, datatype=datatype)
-    moving_slice_lim_obs = limits
+    limits = Observable(get_limits(J, datatype=datatype))
+
+    on(global_scale, update=true) do is_global
+        limits[] = is_global ? get_limits(J, datatype=datatype) :
+                               get_limits(colors_obs[], datatype=datatype)
+    end
+
+    on(colors_obs) do cols
+        if !global_scale[]
+            limits[] = get_limits(cols, datatype=datatype)
+        end
+    end
 
     mesh!(                  #brain slab anatomy display
         ax3d,
@@ -140,9 +145,9 @@ function display_moving_slice(brain, parent, pts, sl_pos, sl_thick, colormap, J,
         lo_k, hi_k = get_range(moving_slice_axis[], pts)
 
         #Setting up the keyboard keys that control the slice movement
-        if     event.key == Keyboard.right || event.key == Keyboard.up
+        if     event.key == Keyboard.up
             set_close_to!(sl_pos, clamp(moving_slice_pos[] + step, Float32(lo_k), Float32(hi_k)))
-        elseif event.key == Keyboard.left  || event.key == Keyboard.down
+        elseif event.key == Keyboard.down
             set_close_to!(sl_pos, clamp(moving_slice_pos[] - step, Float32(lo_k), Float32(hi_k)))
 
         #Setting up the keyboard keys that change the axis followed by the slice
@@ -165,7 +170,6 @@ Disconnects the keyboard navigation and clears the blocks created by `init_defil
 """
 function clear_moving_slice()
     global moving_slice_blocks, moving_slice_buttons, defil_keyboard
-    global moving_slice_lim_obs
 
     # Disconnecting the keyboard navigation
     try;
@@ -184,11 +188,6 @@ function clear_moving_slice()
             try; delete!(btn); catch; end
         end
     end
-
-    if moving_slice_lim_obs !== nothing
-        empty!(moving_slice_lim_obs.listeners)  
-    end
-
     catch;
     end
 end

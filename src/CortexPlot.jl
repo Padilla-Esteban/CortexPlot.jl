@@ -24,7 +24,7 @@ include("common.jl")
 include("cortex3D.jl")
 include("cortex3D_slice.jl")
 include("cortex2D_8view.jl")
-include("cortex3D_3slice.jl")
+include("cortex3D_3view.jl")
 include("cortex2D_3view.jl")
 include("cortexviewer.jl")
 
