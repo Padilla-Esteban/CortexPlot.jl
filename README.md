@@ -232,7 +232,7 @@ X = X[1:sr, :] # use only the first 128 time samples of X
 sensors = readSensors(EXAMPLE_Normative_1_sensors);
 
 # computes a leadfield matrix for 5002 voxels using Leadfields.jl
-voxels = 5002 # can also be 2503 for a lower voxel resolution.
+voxels = 5002 # can also be 2503 for a lower voxels resolution.
 K, ename, eloc, gridloc = leadfield(sensors; voxels);
 
 # calculation of sLORETA transformation matrix T with Xloreta.jl.
@@ -244,8 +244,8 @@ T = sLORETA(Float64.(K), 1);
 # J_raw is a matrix of size (voxels*3) × n_samples in X
 J_raw = T * Transpose(X)  
 
-# calculation of current density module (size : voxels × n_times) using Xloreta.jl
-# This is the data that will be visualized, frame by frame (column by column)
+# calculation of current density module (size : voxels × n_times) using Xloreta.jl.
+# this is the data that will be visualized, frame by frame (column by column)
 J = hcat((cd2sm(Vector(c)) for c in eachcol(J_raw))...)  
 
 # This is optional, to have a title and display in full screen mode directly
@@ -254,7 +254,7 @@ GLMakie.activate!(title = "Title of my study", fullscreen = true)
 # Run the dashboard to visualize the data
 cortex_dashboard(J; title="Title of my plot", voxels) 
 
-# if a specific mode is desired, use instead, for example
+# if only a specific visualization mode is desired, use instead, for example
 #cortex_plot(J; voxels, mode = :cortex3D_slice)
 ```
 
