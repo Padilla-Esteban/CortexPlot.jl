@@ -13,7 +13,7 @@
 
 This package allows to visualize EEG vector-type distributed inverse solutions data on a standard cortex in 2D and 3D. It is entirely written in [julia](https://julialang.org/) and is powered by [Makie.jl](https://docs.makie.org/stable/). 
 
-The data that can be visualized by this package can be produced by [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl) or can be manipulations thereof.
+The data to be visualized by this package can be produced by [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl) or can be manipulations thereof.
 
 > [!WARNING]
 > As usual in Julia, the time to first plot (TTFP) may be long, depending on the PC. From the second plot on, it will be much faster.
@@ -53,7 +53,7 @@ Pkg.add(url="https://github.com/Marco-Congedo/CortexPlot.jl")
 
 ## 🔣 Description
 
-This package allows the visualization in 2D and 3D of functional brain neuroimaging data using a color code on top of a structural cortical image. Several kind of plots are available, individually or altogether in a *dashboard* that allows to easily switch from one to the others. All plots can be inspected and several parameters can be changed on the fly within the dashboard. Typical visualizations of this package concern:
+This package allows the visualization in **2D** and **3D** of **functional brain neuroimaging data** using a color code on top of a structural cortical image. Several kind of plots are available, individually or altogether in a **dashboard** that allows to easily switch from one to the others. All plots can be inspected and several parameters can be changed on the fly within the dashboard. Typical visualizations of this package concern:
 
 - current density square module for *p* voxels as computed by [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl). 
 
@@ -92,7 +92,7 @@ function cortex_dashboard(data :: Union{Vector{Real}, Matrix{Real}};
 
 **Argument**
 
-- `data`: a vector holding the value to be plotted at each voxel, or a matrix where each column is such a vector (a frame for a sequence).
+- `data`: a vector holding the value to be plotted at each voxel, or a matrix where each column is such a vector (a frame for a sequence of images).
 
 **Optional Keyword Arguments**
 - `voxels`: the number of voxels *p* forming the solution space. It can be `2503` (default) or `5002`. 
@@ -104,7 +104,7 @@ function cortex_dashboard(data :: Union{Vector{Real}, Matrix{Real}};
 
 
 The second exported function, `cortex_plot`, can be used instead of the dashboard when only a specific visualization mode is needed. It supports exactly the same arguments as `cortex_dashboard` with the addition of keyword argument `mode`, which set the visualization mode. Possible values are: 
-    `:Cortex3D` (default), `:Cortex3D_slice`, `:Cortex3D_3view`, `:Cortex2D_8view`, and `:Cortex2D_3view` --- for the visualization modes see [Interactions](#-interactions).
+    `:Cortex3D` (default), `:Cortex3D_slice`, `:Cortex3D_3view`, `:Cortex2D_8view`, and `:Cortex2D_3view` — for the visualization modes see [Interactions](#-interactions).
 
 [▲ index](#-index)
 
@@ -114,7 +114,9 @@ The second exported function, `cortex_plot`, can be used instead of the dashboar
 
 The [dashboard](#-api) contains drop-box menus, text boxes, sliders and buttons. Interactions are also possible using the keyboard and the mouse.
 
-▼ The first drop-box menu allows the user to switch between five available display modes:
+### ▼ Drop-Box Menus
+
+The first drop-box menu allows the user to switch between five available display modes:
 
 1) `Cortex3D`: the default display mode, which displays the whole cortex in 3D (Fig. 1). 
 
@@ -160,33 +162,39 @@ The [dashboard](#-api) contains drop-box menus, text boxes, sliders and buttons.
 </p>
 
 
-▼ The second drop-box menu allows to select the color scheme for the color map.
+The second drop-box menu allows to select the color scheme for the color map.
 
-▼ The third drop-box allows to switch between the *Global* and *Local* scaling mode; with *Global* scaling all frames are scaled to the maximum across all frames, while with *Local* scaling each frame is scaled to its own maximum.
+The third drop-box allows to switch between the *Global* and *Local* scaling mode; with *Global* scaling all frames are scaled to the maximum across all frames, while with *Local* scaling each frame is scaled to its own maximum.
 
-──●── The "Alpha" slider sets the opacity of the cortex. 
+### ──●── Sliders
 
-──●── The "Color scale" slider sets the non-linearity of the color map.
+The "Alpha" slider sets the opacity of the cortex. 
 
-🔲 The "▶" button switches between *Play* and *Pause* animation mode. 
+The "Color scale" slider sets the non-linearity of the color map.
 
-🔲 The "Display max" displays the sections through the voxel with maximum value. It applies only to visualization modes 3 and 5.
+### 🔲 Buttons
 
-**⌨ Keyboard controls:**
+The "▶" button switches between *Play* and *Pause* animation mode. 
 
-| key     | Effect | Apply to mode |
+The "Display max" displays the sections through the voxel with maximum value. It applies only to visualization modes 3 and 5.
+
+### ⌨ Keyboard controls
+
+| Key     | Effect | Apply to mode |
 |:--------|:-------|:--------------|
-| ← / → (left and right arrow)| display the previous / next frame   |    all      |
-| ↑ / ↓ (up and down arrow)| increase / decrease the position of the slice   |    2.      |
-| + / - (up and down arrow)| increase / decrease the thickness of the slice   |    2.      |
+| ← / → | display the previous / next frame   |    all      |
+| ↑ / ↓ | increase / decrease the position of the slice   |    2.      |
+| + / - | increase / decrease the thickness of the slice   |    2.      |
 | V | displays the three sections through the voxel under the mouse's pointer   |    3.      |
  
-**⊕ Mouse Controls for 2D visualization modes:**
+### ⊕ Mouse Controls 
+
+**2D visualization modes**:
 
 - *Primary mouse button click and Drag*: zoom in
 - *CTRL + Primary mouse button click*: reset
 
-**⊕ Mouse Controls for 3D visualization modes:**
+**3D visualization modes:**
 
 - *Primary mouse button click and Drag*: rotate
 - *SHIFT + Primary mouse button click*: reset rotation
