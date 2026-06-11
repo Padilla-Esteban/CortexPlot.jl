@@ -10,7 +10,7 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
     f          = Figure(backgroundcolor = RGBf(1, 1, 1), size = (1200, 700))
     t_idx      = Observable(1) #Observable referring to the time 
     colormap   = Observable(colorscheme)
-    mode       = Observable(:cortex3D)
+    mode       = Observable(:Cortex3D)
     gl_alpha   = Observable(alpha)
     animating  = Observable(false)
     global_scale = Observable(true)
@@ -147,7 +147,7 @@ end
 function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
                     voxels :: Int64 = 2503,
                     alpha :: Real = 1.0,
-                    mode :: Symbol = :cortex3D,
+                    mode :: Symbol = :Cortex3D,
                     title :: String = "Brain activation",
                     colorbar_label :: String = "Current density squared module",
                     colorscheme:: Symbol = :rain,
@@ -237,15 +237,15 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
     end
     
     content = GridLayout(f[2, 1])
-    if mode === :cortex3D
+    if mode === :Cortex3D
         cortex3D(cortex, content, gl_alpha, J, colors_obs, global_scale, scale_gamma, colormap,datatype=datatype, title=title, fontsize = fontsize)
-    elseif mode === :cortex3D_slice
+    elseif mode === :Cortex3D_slice
         cortex3D_slice(cortex, content, gl_alpha, J, colors_obs, global_scale, scale_gamma, colormap, datatype=datatype, title=title, fontsize = fontsize)
-    elseif mode === :cortex3D_3view
+    elseif mode === :Cortex3D_3view
         cortex3D_3view(cortex, content, J, colors_obs, gl_alpha, global_scale, scale_gamma, colormap, datatype=datatype, title=title, fontsize = fontsize)
-    elseif mode === :cortex2D_8view
+    elseif mode === :Cortex2D_8view
         cortex2D_8view(cortex, content, J, colors_obs, gl_alpha, global_scale, scale_gamma, colormap, datatype=datatype, colorbar_label=colorbar_label, fontsize=fontsize)
-    elseif mode === :cortex2D_3view
+    elseif mode === :Cortex2D_3view
         cortex2D_3view(cortex, content, J,colors_obs, gl_alpha, global_scale, scale_gamma, colormap, datatype=datatype, fontsize = fontsize)
     end
 

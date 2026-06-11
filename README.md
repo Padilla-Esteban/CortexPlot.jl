@@ -15,6 +15,9 @@ This package allows to visualize EEG vector-type distributed inverse solutions d
 
 The data that can be visualized by this package can be produced by [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl) or can be manipulations thereof.
 
+> [!WARNING]
+> As usual in Julia, the time to first plot (TTFP) may be long, depending on the PC. From the second plot on, it will be much faster.
+
 ![separator](Documents/separator.png)
 
 <img width="1078" height="658" alt="CortexPlot gif" src="https://github.com/user-attachments/assets/d563b48c-602f-475f-96d1-776f8d74e7d0" />
@@ -74,7 +77,7 @@ This package allows the visualization in 2D and 3D of functional brain neuroimag
 
 ## 🔌 API
 
-The package exports only two functions. The main function is a **dashboard**:
+The package exports only two functions. The main function runs a **dashboard**:
 
 ```julia
 function cortex_dashboard(data :: Union{Vector{Real}, Matrix{Real}};
@@ -100,11 +103,8 @@ function cortex_dashboard(data :: Union{Vector{Real}, Matrix{Real}};
 - `colorscheme`: The initial [color scheme](https://juliagraphics.github.io/ColorSchemes.jl/dev/catalogue/). The default is `:rain`. 
 
 
-The second exported function, `cortex_plot`, can be used when only a specific visualization mode is needed.
-
-It supports exactly the same arguments as `cortex_dashboard` with the addition of keyword argument `mode`,
-which set the visualization mode. Possible values are: 
-    `:cortex3D` (default), `:cortex3D_slice`, `:cortex3D_3view`, `:cortex2D_8view`, and `:cortex2D_3view`.
+The second exported function, `cortex_plot`, can be used instead of the dashboard when only a specific visualization mode is needed. It supports exactly the same arguments as `cortex_dashboard` with the addition of keyword argument `mode`, which set the visualization mode. Possible values are: 
+    `:Cortex3D` (default), `:Cortex3D_slice`, `:Cortex3D_3view`, `:Cortex2D_8view`, and `:Cortex2D_3view` --- for the visualization modes see [Interactions](#-interactions).
 
 [▲ index](#-index)
 
@@ -112,9 +112,9 @@ which set the visualization mode. Possible values are:
 
 ## 🎮 Interactions
 
-The dashboard contains drop-box menus, text boxes, sliders and buttons.
+The [dashboard](#-api) contains drop-box menus, text boxes, sliders and buttons. Interactions are also possible using the keyboard and the mouse.
 
-The first drop-box menu allows the user to switch between five available display modes:
+▼ The first drop-box menu allows the user to switch between five available display modes:
 
 1) `Cortex3D`: the default display mode, which displays the whole cortex in 3D (Fig. 1). 
 
@@ -160,21 +160,19 @@ The first drop-box menu allows the user to switch between five available display
 </p>
 
 
-The second drop-box menu allows to select the color scheme for the color map.
+▼ The second drop-box menu allows to select the color scheme for the color map.
 
-The third drop-box allows to switch between the *Global* and *Local* scaling mode; with *Global* scaling all frames are scaled to the maximum across all frames, while with *Local* scaling each frame is scaled to its own maximum.
+▼ The third drop-box allows to switch between the *Global* and *Local* scaling mode; with *Global* scaling all frames are scaled to the maximum across all frames, while with *Local* scaling each frame is scaled to its own maximum.
 
-Several additional controls are available in the dashboard:
+──●── The "Alpha" slider sets the opacity of the cortex. 
 
-| Control | Effect | Apply to mode |
-|:--------|:-------|:--------------|
-| "▶" button | switch between *Play* and *Pause* animation mode   |    all      |
-| "Display max" button   | set the sections through the voxel with maximum value       | 3., 5.            |
-| "Alpha" slider    | opacity of the cortex        |     all          |
-| "Color scale" slider  | non-linearity of the color map  | all               |
+──●── The "Color scale" slider sets the non-linearity of the color map.
 
+🔲 The "▶" button switches between *Play* and *Pause* animation mode. 
 
-⌨ Keyboard controls:
+🔲 The "Display max" displays the sections through the voxel with maximum value. It applies only to visualization modes 3 and 5.
+
+**⌨ Keyboard controls:**
 
 | key     | Effect | Apply to mode |
 |:--------|:-------|:--------------|
@@ -183,24 +181,18 @@ Several additional controls are available in the dashboard:
 | + / - (up and down arrow)| increase / decrease the thickness of the slice   |    2.      |
 | V | displays the three sections through the voxel under the mouse's pointer   |    3.      |
  
+**⊕ Mouse Controls for 2D visualization modes:**
 
-> [!TIP] 
-> In addition to all the controls listed above, all the standard Makie controls are available. In particular:
->
-> **2D plots**
->
-> - *Primary mouse button click and Drag*: zoom in
-> - *CTRL + Primary mouse button click*: reset
->
-> **3D plots**
->
-> - *Primary mouse button click and Drag*: rotate
-> - *SHIFT + Primary mouse button click*: reset rotation
-> - *Secondary mouse button click and Drag*: pan
-> - *Mouse wheel*: zoom in & out
-> - *CTRL + Primary mouse button click*: reset pas and zooming
+- *Primary mouse button click and Drag*: zoom in
+- *CTRL + Primary mouse button click*: reset
 
-For more information see [here](https://docs.makie.org/stable/reference/blocks/axis3#Axis3-interactions) for 3D plots and [here](https://docs.makie.org/stable/reference/blocks/axis#Axis-interaction) for 2D plots.
+**⊕ Mouse Controls for 3D visualization modes:**
+
+- *Primary mouse button click and Drag*: rotate
+- *SHIFT + Primary mouse button click*: reset rotation
+- *Secondary mouse button click and Drag*: pan
+- *Mouse wheel*: zoom in & out
+- *CTRL + Primary mouse button click*: reset pas and zooming
 
 [▲ index](#-index)
 
