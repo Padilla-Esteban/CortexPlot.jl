@@ -45,14 +45,6 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
     time_lbl = Label(f[1, 1][3, 1][1, 3], "Frame:")
     time_lbl_val = Label(f[1, 1][3, 1][1,4], @lift("$($t_idx)"), width = 50)
 
-    if event.key == Keyboard.left
-        t_idx[] = mod1(t_idx[] - 1, T)
-        set_close_to!(time_sl, t_idx[])
-    elseif event.key == Keyboard.right
-        t_idx[] = mod1(t_idx[] + 1, T)
-        set_close_to!(time_sl, t_idx[])
-    end
-
     # - Alpha slider - 
     lbl_global_alpha    = Label(f[1, 1][3, 2][1, 1],  "Alpha")
     sl_global_alpha      = Slider(f[1, 1][3, 2][1, 2], range = 0:0.1:1, startvalue = alpha)
@@ -94,8 +86,15 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
                     set_close_to!(time_sl, t_idx[])
                 end
             end
+        elseif event.key == Keyboard.left && event.action == Keyboard.press
+            t_idx[] = mod1(t_idx[] - 1, T)
+            set_close_to!(time_sl, t_idx[])
+        elseif event.key == Keyboard.right && event.action == Keyboard.press
+            t_idx[] = mod1(t_idx[] + 1, T)
+            set_close_to!(time_sl, t_idx[])
         end
     end
+
     # - Layout of the main window -
     rowsize!(f.layout, 1, Fixed(50))   #menu
 
@@ -189,14 +188,6 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
     time_lbl = Label(f[1, 1][3, 1][1, 3], "Frame:")
     time_lbl_val = Label(f[1, 1][3, 1][1,4], @lift("$($t_idx)"), width = 50)
 
-    if event.key == Keyboard.left
-        t_idx[] = mod1(t_idx[] - 1, T)
-        set_close_to!(time_sl, t_idx[])
-    elseif event.key == Keyboard.right
-        t_idx[] = mod1(t_idx[] + 1, T)
-        set_close_to!(time_sl, t_idx[])
-    end
-
     lbl_global_alpha    = Label(f[1, 1][3, 2][1, 1],  "Alpha")
     sl_global_alpha      = Slider(f[1, 1][3, 2][1, 2], range = 0:0.1:1, startvalue = alpha)
     connect!(gl_alpha, sl_global_alpha.value)
@@ -236,8 +227,15 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
                     set_close_to!(time_sl, t_idx[])
                 end
             end
+        elseif event.key == Keyboard.left && event.action == Keyboard.press
+            t_idx[] = mod1(t_idx[] - 1, T)
+            set_close_to!(time_sl, t_idx[])
+        elseif event.key == Keyboard.right && event.action == Keyboard.press
+            t_idx[] = mod1(t_idx[] + 1, T)
+            set_close_to!(time_sl, t_idx[])
         end
     end
+    
     content = GridLayout(f[2, 1])
     if mode === :cortex3D
         cortex3D(cortex, content, gl_alpha, J, colors_obs, global_scale, scale_gamma, colormap,datatype=datatype, title=title, fontsize = fontsize)
