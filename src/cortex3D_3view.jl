@@ -179,9 +179,9 @@ function display_3D_three_view(brain, x, y, z, colors_obs, colormap, alpha, data
         end
     end
 
-    three_view3D_ax_nx = display_3D_view(brain, 1, x, 10, three_view3D_parent[1, 3], "x-Normal slice", colors_obs, colormap, alpha, datatype, limits, scale_gamma)
-    three_view3D_ax_ny = display_3D_view(brain, 2, y, 10, three_view3D_parent[2, 3], "y-Normal slice", colors_obs, colormap, alpha, datatype, limits, scale_gamma)
-    three_view3D_ax_nz = display_3D_view(brain, 3, z, 10, three_view3D_parent[3, 3], "z-Normal slice", colors_obs, colormap, alpha, datatype, limits, scale_gamma)
+    three_view3D_ax_nx = display_3D_view(brain, 1, x, 10, three_view3D_parent[1, 3], "Coronal section", colors_obs, colormap, alpha, datatype, limits, scale_gamma)
+    three_view3D_ax_ny = display_3D_view(brain, 2, y, 10, three_view3D_parent[2, 3], "Sagittal section", colors_obs, colormap, alpha, datatype, limits, scale_gamma)
+    three_view3D_ax_nz = display_3D_view(brain, 3, z, 10, three_view3D_parent[3, 3], "Axial Section", colors_obs, colormap, alpha, datatype, limits, scale_gamma)
 
     colsize!(three_view3D_parent, 2, Fixed(50))
     colsize!(three_view3D_parent, 1, Fixed(600))
