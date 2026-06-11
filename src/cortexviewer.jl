@@ -57,10 +57,10 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
     connect!(scale_gamma, sl_bias.value)
     lbl_bias_val = Label(f[1, 1][3, 2][1, 7], @lift("$(round($scale_gamma, digits=2))"), width=40)
 
-    scale_btn = Button(f[1, 1][3, 2][1, 4], label = @lift($global_scale ? "Global scale" : "Local scale"))
+    scale_menu = Menu(f[1, 1][2, 2][1, 1], options= ["Global", "Local"], default="Global")
    
-    on(scale_btn.clicks) do event 
-        global_scale[] = !global_scale[]
+    on(scale_menu.selection) do event 
+        global_scale[] = event == "Global" ? true : false
     end
 
 
@@ -99,7 +99,7 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
     rowsize!(f.layout, 1, Fixed(50))   #menu
 
     menu = Menu(f[1, 1][2, 1],
-                options = ["Cortex3D", "Cortex3D slice", "Cortex3D 3 view", "Cortex2D 8 view", "Cortex2D 3 view"],
+                options = ["Cortex3D", "Cortex3D_slice", "Cortex3D_3_view", "Cortex2D_8_view", "Cortex2D_3_view"],
                 default = "Cortex3D")
 
     # - Initial display -
@@ -110,34 +110,27 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
     # - Mode switch -
     on(menu.selection) do s
         #cleaning of the scene
+        mode[] = Symbol(s)
         clear_content!()
 
         #new layout
         content = GridLayout(f[2, 1])
 
         #selected module call
-        if s == "Cortex3D"
+        if mode[] == :Cortex3D
             cortex3D(cortex, content, gl_alpha, J, colors_obs, global_scale, scale_gamma, colormap, datatype=datatype, title=title, colorbar_label=colorbar_label, fontsize=fontsize)
-            mode[] = :cortex3D
-
-        elseif s == "Cortex3D slice"
+        elseif mode[] == :Cortex3D_slice
             cortex3D_slice(cortex, content, gl_alpha, J, colors_obs, global_scale, scale_gamma, colormap, datatype=datatype, title=title, colorbar_label=colorbar_label, fontsize=fontsize)
-            mode[] = :cortex3D_slice
-
-        elseif s == "Cortex3D 3 view"
+        elseif mode[] == :Cortex3D_3_view
             cortex3D_3view(cortex, content, J, colors_obs, gl_alpha, global_scale, scale_gamma, colormap, datatype=datatype, title=title, colorbar_label=colorbar_label, fontsize=fontsize)
-            mode[] = :cortex3D_3view
-
-        elseif s == "Cortex2D 8 view"
+        elseif mode[] == :Cortex2D_8_view
             cortex2D_8view(cortex, content, J, colors_obs, gl_alpha, global_scale, scale_gamma, colormap, datatype=datatype, colorbar_label=colorbar_label, fontsize=fontsize)
-            mode[] = :cortex2D_8view
-        elseif s == "Cortex2D 3 view"
+        elseif mode[] == :Cortex2D_3_view
             cortex2D_3view(cortex, content, J, colors_obs, gl_alpha, global_scale, scale_gamma, colormap, datatype=datatype, colorbar_label=colorbar_label, fontsize=fontsize)
-            mode[] = :cortex2D_3view
         end
     end
 
-    colormap_menu = Menu(f[1, 1][2, 2], options = ["solar", "redsblues", "magma", "rain", "bilbao", "roma", "broc", "vik"], default = "solar")
+    colormap_menu = Menu(f[1, 1][2, 1], options = ["rain", "magma", "bilbao", "solar", "roma", "broc", "redsblues", "vik"], default = "rain")
     on(colormap_menu.selection) do s
         colormap[] = Symbol(s)
     end
@@ -199,10 +192,10 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
     connect!(scale_gamma, sl_bias.value)
     lbl_bias_val = Label(f[1, 1][2, 2][1, 4], @lift("$(round($scale_gamma, digits=2))"), width=40)
 
-    scale_btn = Button(f[1, 1][2, 2][1, 1], label = @lift($global_scale ? "Global scale" : "Local scale"))
+    scale_menu = Menu(f[1, 1][2, 2][1, 1], options= ["Global", "Local"], default="Global")
    
-    on(scale_btn.clicks) do event 
-        global_scale[] = !global_scale[]
+    on(scale_menu.selection) do event 
+        global_scale[] = event == "Global" ? true : false
     end
 
     play = Button(f[1, 1][3, 1][1, 1], label = @lift($animating ? "❚❚" : "▶"))
@@ -249,7 +242,7 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
         cortex2D_3view(cortex, content, J,colors_obs, gl_alpha, global_scale, scale_gamma, colormap, datatype=datatype, fontsize = fontsize)
     end
 
-    colormap_menu = Menu(f[1, 1][2, 1], options = ["solar", "redsblues", "magma", "rain", "bilbao", "roma", "broc", "vik"], default = "solar")
+    colormap_menu = Menu(f[1, 1][2, 1], options = ["rain", "magma", "bilbao", "solar", "roma", "broc", "redsblues", "vik"], default = "rain")
     on(colormap_menu.selection) do s
         colormap[] = Symbol(s)
     end
