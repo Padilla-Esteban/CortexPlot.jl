@@ -15,6 +15,9 @@ This package allows to visualize EEG vector-type distributed inverse solutions d
 
 The data that can be visualized by this package can be produced by [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl) or can be manipulations thereof.
 
+> [!WARNING]
+> As usual in Julia, the time to first plot (TTFP) may be long. From the second plot on, it will be much faster.
+
 ![separator](Documents/separator.png)
 
 <img width="1078" height="658" alt="CortexPlot gif" src="https://github.com/user-attachments/assets/d563b48c-602f-475f-96d1-776f8d74e7d0" />
