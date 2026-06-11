@@ -17,6 +17,10 @@ The data that can be visualized by this package can be produced by [Xloreta](htt
 
 ![separator](Documents/separator.png)
 
+<img width="1078" height="658" alt="CortexPlot gif" src="https://github.com/user-attachments/assets/d563b48c-602f-475f-96d1-776f8d74e7d0" />
+
+![separator](Documents/separator.png)
+
 ## 🧭 Index
 
 - 📦 [Installation](#-installation)
@@ -39,14 +43,13 @@ using Pkg
 Pkg.add(url="https://github.com/Marco-Congedo/CortexPlot.jl")
 ```
 
-
 [▲ index](#-index)
 
 ![separator](Documents/separator.png)
 
 ## 🔣 Description
 
-This package allows the visualization in 2D and 3D of functional brain neuroimaging data using a color code on top of a structural cortical image. Several kind of plots are available, individually or altogether in a *dashboard* that allows to easily switch from one to the other. All plots can be inspected and several parameters can be changed on the fly within the dashboard. Typical visualizations of this package concern:
+This package allows the visualization in 2D and 3D of functional brain neuroimaging data using a color code on top of a structural cortical image. Several kind of plots are available, individually or altogether in a *dashboard* that allows to easily switch from one to the others. All plots can be inspected and several parameters can be changed on the fly within the dashboard. Typical visualizations of this package concern:
 
 - current density square module for *p* voxels as computed by [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl). 
 
@@ -78,7 +81,8 @@ function cortex_dashboard(data :: Union{Vector{Real}, Matrix{Real}};
                         alpha :: Real = 1.0,
                         title :: String = "Brain activation",
                         colorbar_label :: String = "Current density square module",
-                        fontsize :: Real = 16.0
+                        fontsize :: Real = 16.0,
+                        colorscheme :: Symbol = :rain
                         )
 ```
 
@@ -91,7 +95,8 @@ function cortex_dashboard(data :: Union{Vector{Real}, Matrix{Real}};
 - `alpha`: the transparency of the cortex. By default it is 1.0 (completely opaque). 
 - `title`: the title of the plot. 
 - `colorbar_label`: the label of the color bar. By default it is "current density squared module".
-- `fontsize`: the size of the font for the axes. Its default value (16.0) is the Makie's default value.  
+- `fontsize`: the size of the font for the axes. Its default value (16.0) is the Makie's default value. 
+- `colorscheme`: The initial [color scheme](https://juliagraphics.github.io/ColorSchemes.jl/dev/catalogue/). The default is `:rain`. 
 
 The dashboard contains drop-box menus, text boxes, sliders and buttons.
 
@@ -106,7 +111,7 @@ The first drop-box menu allows the user to switch between five available display
 </p>
 
 
-2) `Cortex3D_slice`: displays in 3D a slice of the cortex along the x, y or z axis, which **position** and **tickness** can be set by means of sliders and arrow keys (Fig. 2).
+2) `Cortex3D_slice`: displays in 3D a slice of the cortex along the x, y or z axis, which **position** and **tickness** can be set by means of sliders (Fig. 2).
 
 <p align="left">
   <img src="Documents/Fig2.png" width="560">
@@ -200,6 +205,7 @@ function cortex_plot(data :: Union{Vector{Real}, Matrix{Real}};
 - `title`: the title of the plot. 
 - `colorbar_label`: the label of the color bar. By default it is "current density squared module".
 - `fontsize`: the size of the font for the axes. Its default value (16.0) is the Makie's default value. 
+- `colorscheme`: The [color scheme](https://juliagraphics.github.io/ColorSchemes.jl/dev/catalogue/). The default is `:rain`.
 
 
 [▲ index](#-index)
