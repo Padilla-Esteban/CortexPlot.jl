@@ -208,27 +208,36 @@ The "Display max" button displays the sections through the voxel with maximum va
 
 ## 💡 Examples
 
-The following example makes use of packages 
+Besides **CortexPlot.jl**, The following example makes use of packages 
 
 - [Eegle.jl](https://github.com/Marco-Congedo/Eegle.jl) to import example EEG data
-- [Leadfields.jl](https://github.com/Marco-Congedo/Leadfields.jl) to
+- [Leadfields.jl](https://github.com/Marco-Congedo/Leadfields.jl) to read a leadfield matrix
+- [Xloreta.jl](https://github.com/Marco-Congedo/Xloreta.jl) to compute the sLORETA transformation matrix and to compute current density square module vectors from current density vectors.
+- [GLMakie.jl](https://docs.makie.org/stable/explanations/backends/glmakie.html), the plotting backend.
+
+To install these packages, run
+
+```julia
+add Eegle, Leadfields, Xloreta, CortexPlot, GLMakie
+```
+
+Then, run:
 
 ```julia
 using Eegle, Leadfields, Xloreta, CortexPlot, GLMakie
 
 # read example EEG data, sampling rate and sensor labels using Eegle.jl
 X, sr = readASCII(EXAMPLE_Normative_1), 128;
+X = X[1:sr, :] # use only the first 128 time samples of X
 sensors = readSensors(EXAMPLE_Normative_1_sensors);
-voxels = 5002 # used by Leadfields.jl. Can be also 2503.
 
-X = X[1:sr, :] # choose only the 128 first lines of X
-
-# computes leadfield matrix with Leadfields.jl
+# computes a leadfield matrix for 5002 voxels using Leadfields.jl
+voxels = 5002 # can also be 2503 for a lower voxel resolution.
 K, ename, eloc, gridloc = leadfield(sensors; voxels);
 
 # calculation of sLORETA transformation matrix T with Xloreta.jl.
-# In general, the alpha (regularization) value for the inverse solution should be 
-# carefully chosen. Here 1 is taken.
+# NB: in general, the alpha (regularization) value for the inverse solution should be 
+# carefully chosen depending on the data. Here it is set to 1 (second argument).
 T = sLORETA(Float64.(K), 1);
 
 # calculation of curent density for each time sample in EEG data X. 
@@ -236,6 +245,7 @@ T = sLORETA(Float64.(K), 1);
 J_raw = T * Transpose(X)  
 
 # calculation of current density module (size : voxels × n_times) using Xloreta.jl
+# This is the data that will be visualized, frame by frame (column by column)
 J = hcat((cd2sm(Vector(c)) for c in eachcol(J_raw))...)  
 
 # This is optional, to have a title and display in full screen mode directly
