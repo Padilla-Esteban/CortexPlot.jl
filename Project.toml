@@ -1,6 +1,6 @@
 name = "CortexPlot"
 uuid = "3e05bac1-479d-436b-8d8a-dabcf2211736"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Marco Congedo <marco.congedo@gmail.com>", "Arthur Tatlian", "Esteban Padilla"]
 
 [deps]
