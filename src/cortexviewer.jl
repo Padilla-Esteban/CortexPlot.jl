@@ -3,12 +3,13 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
                         alpha :: Real = 1.0,
                         title :: String = "Brain activation",
                         colorbar_label :: String = "Current density squared module",
-                        fontsize :: Real = 16.0
+                        fontsize :: Real = 16.0,
+                        colormap_choice :: Symbol = :rain
                         )where {A<:Real}
     global f
     f          = Figure(backgroundcolor = RGBf(1, 1, 1), size = (1200, 700))
     t_idx      = Observable(1) #Observable referring to the time 
-    colormap   = Observable(:solar)
+    colormap   = Observable(colormap_choice)
     mode       = Observable(:cortex3D)
     gl_alpha   = Observable(alpha)
     animating  = Observable(false)
@@ -45,14 +46,6 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
     time_lbl = Label(f[1, 1][3, 1][1, 3], "Frame:")
     time_lbl_val = Label(f[1, 1][3, 1][1,4], @lift("$($t_idx)"), width = 50)
 
-    if event.key == Keyboard.left
-        t_idx[] = mod1(t_idx[] - 1, T)
-        set_close_to!(time_sl, t_idx[])
-    elseif event.key == Keyboard.right
-        t_idx[] = mod1(t_idx[] + 1, T)
-        set_close_to!(time_sl, t_idx[])
-    end
-
     # - Alpha slider - 
     lbl_global_alpha    = Label(f[1, 1][3, 2][1, 1],  "Alpha")
     sl_global_alpha      = Slider(f[1, 1][3, 2][1, 2], range = 0:0.1:1, startvalue = alpha)
@@ -60,15 +53,15 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
     lbl_global_alpha_var = Label(f[1, 1][3, 2][1, 3], @lift("$(round($gl_alpha, digits=3))"), width = 50)
 
     # - Colorscale slider
-    lbl_bias     = Label(f[1, 1][3, 2][1, 5], "Color scale")
-    sl_bias      = Slider(f[1, 1][3, 2][1, 6], range = 0:0.01:1, startvalue=scale_gamma[])
+    lbl_bias     = Label(f[1, 1][3, 2][1, 4], "Color scale")
+    sl_bias      = Slider(f[1, 1][3, 2][1, 5], range = 0:0.01:1, startvalue=scale_gamma[])
     connect!(scale_gamma, sl_bias.value)
-    lbl_bias_val = Label(f[1, 1][3, 2][1, 7], @lift("$(round($scale_gamma, digits=2))"), width=40)
+    lbl_bias_val = Label(f[1, 1][3, 2][1, 6], @lift("$(round($scale_gamma, digits=2))"), width=40)
 
-    scale_btn = Button(f[1, 1][3, 2][1, 4], label = @lift($global_scale ? "Global scale" : "Local scale"))
+    scale_menu = Menu(f[1, 1][2, 2][1, 2], options= ["Global Scale", "Local Scale"], default="Global Scale")
    
-    on(scale_btn.clicks) do event 
-        global_scale[] = !global_scale[]
+    on(scale_menu.selection) do event 
+        global_scale[] = event == "Global Scale" ? true : false
     end
 
 
@@ -94,13 +87,20 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
                     set_close_to!(time_sl, t_idx[])
                 end
             end
+        elseif event.key == Keyboard.left && event.action == Keyboard.press
+            t_idx[] = mod1(t_idx[] - 1, T)
+            set_close_to!(time_sl, t_idx[])
+        elseif event.key == Keyboard.right && event.action == Keyboard.press
+            t_idx[] = mod1(t_idx[] + 1, T)
+            set_close_to!(time_sl, t_idx[])
         end
     end
+
     # - Layout of the main window -
     rowsize!(f.layout, 1, Fixed(50))   #menu
 
     menu = Menu(f[1, 1][2, 1],
-                options = ["Cortex3D", "Cortex3D slice", "Cortex3D 3 view", "Cortex2D 8 view", "Cortex2D 3 view"],
+                options = ["Cortex3D", "Cortex3D_slice", "Cortex3D_3_view", "Cortex2D_8_view", "Cortex2D_3_view"],
                 default = "Cortex3D")
 
     # - Initial display -
@@ -111,34 +111,32 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
     # - Mode switch -
     on(menu.selection) do s
         #cleaning of the scene
+        mode[] = Symbol(s)
         clear_content!()
 
         #new layout
         content = GridLayout(f[2, 1])
 
         #selected module call
-        if s == "Cortex3D"
+        if mode[] == :Cortex3D
             cortex3D(cortex, content, gl_alpha, J, colors_obs, global_scale, scale_gamma, colormap, datatype=datatype, title=title, colorbar_label=colorbar_label, fontsize=fontsize)
-            mode[] = :cortex3D
-
-        elseif s == "Cortex3D slice"
+        elseif mode[] == :Cortex3D_slice
             cortex3D_slice(cortex, content, gl_alpha, J, colors_obs, global_scale, scale_gamma, colormap, datatype=datatype, title=title, colorbar_label=colorbar_label, fontsize=fontsize)
-            mode[] = :cortex3D_slice
-
-        elseif s == "Cortex3D 3 view"
+        elseif mode[] == :Cortex3D_3_view
             cortex3D_3view(cortex, content, J, colors_obs, gl_alpha, global_scale, scale_gamma, colormap, datatype=datatype, title=title, colorbar_label=colorbar_label, fontsize=fontsize)
-            mode[] = :cortex3D_3view
-
-        elseif s == "Cortex2D 8 view"
+        elseif mode[] == :Cortex2D_8_view
             cortex2D_8view(cortex, content, J, colors_obs, gl_alpha, global_scale, scale_gamma, colormap, datatype=datatype, colorbar_label=colorbar_label, fontsize=fontsize)
-            mode[] = :cortex2D_8view
-        elseif s == "Cortex2D 3 view"
+        elseif mode[] == :Cortex2D_3_view
             cortex2D_3view(cortex, content, J, colors_obs, gl_alpha, global_scale, scale_gamma, colormap, datatype=datatype, colorbar_label=colorbar_label, fontsize=fontsize)
-            mode[] = :cortex2D_3view
         end
     end
 
-    colormap_menu = Menu(f[1, 1][2, 2], options = ["solar", "redsblues", "magma", "rain", "bilbao", "roma", "broc", "vik"], default = "solar")
+    colormap_list = ["rain", "magma", "bilbao", "solar", "roma", "broc", "redsblues", "vik"]
+    if !(String(colormap_choice) in colormap_list)
+        push!(colormap_list, String(colormap_choice))
+    end    
+    
+    colormap_menu = Menu(f[1, 1][2, 2][1, 1], options = colormap_list, default = String(colormap_choice))
     on(colormap_menu.selection) do s
         colormap[] = Symbol(s)
     end
@@ -152,11 +150,12 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
                     mode :: Symbol = :cortex3D,
                     title :: String = "Brain activation",
                     colorbar_label :: String = "Current density squared module",
+                    colormap_choice:: Symbol = :rain,
                     fontsize :: Real = 16.0)where {A<:Real}
     global f
     f          = Figure(backgroundcolor = RGBf(1, 1, 1), size = (1200, 700))
     t_idx      = Observable(1) #Observable referring to the time 
-    colormap   = Observable(:solar)
+    colormap   = Observable(colormap_choice)
     gl_alpha   = Observable(alpha)
     animating  = Observable(false)
     global_scale = Observable(true)
@@ -189,14 +188,6 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
     time_lbl = Label(f[1, 1][3, 1][1, 3], "Frame:")
     time_lbl_val = Label(f[1, 1][3, 1][1,4], @lift("$($t_idx)"), width = 50)
 
-    if event.key == Keyboard.left
-        t_idx[] = mod1(t_idx[] - 1, T)
-        set_close_to!(time_sl, t_idx[])
-    elseif event.key == Keyboard.right
-        t_idx[] = mod1(t_idx[] + 1, T)
-        set_close_to!(time_sl, t_idx[])
-    end
-
     lbl_global_alpha    = Label(f[1, 1][3, 2][1, 1],  "Alpha")
     sl_global_alpha      = Slider(f[1, 1][3, 2][1, 2], range = 0:0.1:1, startvalue = alpha)
     connect!(gl_alpha, sl_global_alpha.value)
@@ -208,10 +199,10 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
     connect!(scale_gamma, sl_bias.value)
     lbl_bias_val = Label(f[1, 1][2, 2][1, 4], @lift("$(round($scale_gamma, digits=2))"), width=40)
 
-    scale_btn = Button(f[1, 1][2, 2][1, 1], label = @lift($global_scale ? "Global scale" : "Local scale"))
+    scale_menu = Menu(f[1, 1][2, 2][1, 1], options= ["Global Scale", "Local Scale"], default="Global Scale")
    
-    on(scale_btn.clicks) do event 
-        global_scale[] = !global_scale[]
+    on(scale_menu.selection) do event 
+        global_scale[] = event == "Global Scale" ? true : false
     end
 
     play = Button(f[1, 1][3, 1][1, 1], label = @lift($animating ? "❚❚" : "▶"))
@@ -236,8 +227,15 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
                     set_close_to!(time_sl, t_idx[])
                 end
             end
+        elseif event.key == Keyboard.left && event.action == Keyboard.press
+            t_idx[] = mod1(t_idx[] - 1, T)
+            set_close_to!(time_sl, t_idx[])
+        elseif event.key == Keyboard.right && event.action == Keyboard.press
+            t_idx[] = mod1(t_idx[] + 1, T)
+            set_close_to!(time_sl, t_idx[])
         end
     end
+    
     content = GridLayout(f[2, 1])
     if mode === :cortex3D
         cortex3D(cortex, content, gl_alpha, J, colors_obs, global_scale, scale_gamma, colormap,datatype=datatype, title=title, fontsize = fontsize)
@@ -251,7 +249,12 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
         cortex2D_3view(cortex, content, J,colors_obs, gl_alpha, global_scale, scale_gamma, colormap, datatype=datatype, fontsize = fontsize)
     end
 
-    colormap_menu = Menu(f[1, 1][2, 1], options = ["solar", "redsblues", "magma", "rain", "bilbao", "roma", "broc", "vik"], default = "solar")
+    colormap_list = ["rain", "magma", "bilbao", "solar", "roma", "broc", "redsblues", "vik"]
+    if !(String(colormap_choice) in colormap_list)
+        push!(colormap_list, String(colormap_choice))
+    end    
+    
+    colormap_menu = Menu(f[1, 1][2, 2][1, 1], options = colormap_list, default = String(colormap_choice))
     on(colormap_menu.selection) do s
         colormap[] = Symbol(s)
     end

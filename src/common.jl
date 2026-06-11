@@ -149,7 +149,8 @@ function activation_rgba(values, cmap_name, limits; midpoint=0.5f0)
     warped = normalized .^ γ
 
     # Convert the colormap name into a concrete vector of RGBAf colors.
-    cmap = to_colormap(Reverse(cmap_name))
+    cmap = apply_colormap(cmap_name)
+
 
     n = length(cmap)
 
@@ -166,6 +167,11 @@ function activation_rgba(values, cmap_name, limits; midpoint=0.5f0)
         end
         for w in warped   # iterate over each per-vertex normalized activation value
     ]
+end
+
+function apply_colormap(cmap_name::Symbol)
+    NOT_REVERSED_COLORMAPS = Set([:rain, :vik, :broc])
+    return cmap_name in NOT_REVERSED_COLORMAPS ? to_colormap(cmap_name) : to_colormap(Reverse(cmap_name))
 end
 
 
@@ -199,7 +205,7 @@ end
 #Function used to update the colorbar scale when moving the colormap scale
 function warped_cmap(colormap, mid)
     γ = log(0.5f0) / log(clamp(Float32(mid), 0.001f0, 0.999f0))
-    cmap = to_colormap(Reverse(colormap))
+    cmap = apply_colormap(colormap)
     n = length(cmap)
     return [cmap[clamp(round(Int, ((i-1)/(n-1))^γ * (n-1)) + 1, 1, n)] for i in 1:n]
 end

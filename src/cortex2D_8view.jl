@@ -23,14 +23,14 @@ function cortex2D_8view(brain,
     # - Definition of the sectional views -
     # (position in the grid, azimuth, elevation, section)
     views = [
-        (1,1,  0.0,   0.0,    section(lo_y, hi_y,  2), "OR"),
-        (2,1,  pi,   0.0,    section(0,    hi_y,  2), "IL"),
-        (3,1,  0.0,   pi/2,   section(lo_z, hi_z,  3), "A"),
-        (1,2,  pi/2,  0.0,    section(lo_x, hi_x,  1), "F"),
-        (2,2, -pi/2,  0.0,    section(lo_x, hi_x,  1), "B"),
-        (1,3,  pi,    0.0,    section(lo_y, hi_y,  2), "OL"),
-        (2,3,  0.0,  0.0,    section(lo_y, 0,     2), "IR"),
-        (3,3,  0.0,  -pi/2,   section(lo_z, hi_z,  3), "U"),
+        (1,1,  0.0,   0.0,    section(lo_y, hi_y,  2), "L, RH"),
+        (2,1,  pi,   0.0,    section(0,    hi_y,  2), "M, RH"),
+        (3,1,  0.0,   pi/2,   section(lo_z, hi_z,  3), "S"),
+        (1,2,  pi/2,  0.0,    section(lo_x, hi_x,  1), "A"),
+        (2,2, -pi/2,  0.0,    section(lo_x, hi_x,  1), "P"),
+        (1,3,  pi,    0.0,    section(lo_y, hi_y,  2), "L, LH"),
+        (2,3,  0.0,  0.0,    section(lo_y, 0,     2), "M, LH"),
+        (3,3,  0.0,  -pi/2,   section(lo_z, hi_z,  3), "I"),
     ]
     
     limits = Observable(get_limits(J, datatype=datatype))
@@ -95,21 +95,7 @@ function cortex2D_8view(brain,
         text!(ax, texte, position = (1.0, 0.0), align = (:right, :bottom), space = :relative)
     end
 
-    ax_text_legend_above = Axis(parent[3, 2][1,1],bottomspinevisible=false,
-                leftspinevisible=false,
-                rightspinevisible=false,
-                topspinevisible=false,
-                xgridvisible=false,
-                ygridvisible=false,
-                xminorgridvisible=false,
-                yminorgridvisible=false,
-                xminorticksvisible=false,
-                yminorticksvisible=false,
-                xticklabelsvisible=false,
-                yticklabelsvisible=false,
-                xticksvisible=false,
-                yticksvisible=false)
-    ax_text_legend_under = Axis(parent[3, 2][2,1],bottomspinevisible=false,
+    ax_text_legend = Axis(parent[3, 2][1,1],bottomspinevisible=false,
                 leftspinevisible=false,
                 rightspinevisible=false,
                 topspinevisible=false,
@@ -124,10 +110,12 @@ function cortex2D_8view(brain,
                 xticksvisible=false,
                 yticksvisible=false)
 
-    text!(ax_text_legend_above, "O=outside, I=inside, F=front, B=back",position = (0.5, 0.0), align = (:center, :bottom), space = :relative)
-    text!(ax_text_legend_under, "A=above, U=under, L=left, R=right",position = (0.5, 1.0), align = (:center, :top), space = :relative)
+    text!(ax_text_legend, "A = Anterior, P = Posterior",position = (0.5, 0.55), align = (:center, :center), space = :relative)
+    text!(ax_text_legend, "L = Lateral, M = Medial",position = (0.5, 0.4), align = (:center, :center), space = :relative)
+    text!(ax_text_legend, "S = Superior, I = Inferior",position = (0.5, 0.25), align = (:center, :center), space = :relative)
+    text!(ax_text_legend, "LH = Left Hemisphere , RH = Right Hemisphere",position = (0.5, 0.1), align = (:center, :center), space = :relative)
 
-    push!(eight_view_axis, ax_text_legend_above, ax_text_legend_under)
+    push!(eight_view_axis, ax_text_legend)
 
     cb = Colorbar(parent[1:3, 4],
         colormap   = warped_cmap(colormap[], scale_gamma[]), 
