@@ -170,8 +170,8 @@ function activation_rgba(values, cmap_name, limits; midpoint=0.5f0)
 end
 
 function apply_colormap(cmap_name::Symbol)
-    REVERSED_COLORMAPS = Set([:rain, :vik, :broc])
-    return cmap_name in REVERSED_COLORMAPS ? to_colormap(Reverse(cmap_name)) : to_colormap(cmap_name)
+    NOT_REVERSED_COLORMAPS = Set([:rain, :vik, :broc])
+    return cmap_name in NOT_REVERSED_COLORMAPS ? to_colormap(cmap_name) : to_colormap(Reverse(cmap_name))
 end
 
 
