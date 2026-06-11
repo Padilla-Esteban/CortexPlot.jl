@@ -4,12 +4,12 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
                         title :: String = "Brain activation",
                         colorbar_label :: String = "Current density squared module",
                         fontsize :: Real = 16.0,
-                        colormap_choice :: Symbol = :rain
+                        colorscheme :: Symbol = :rain
                         )where {A<:Real}
     global f
     f          = Figure(backgroundcolor = RGBf(1, 1, 1), size = (1200, 700))
     t_idx      = Observable(1) #Observable referring to the time 
-    colormap   = Observable(colormap_choice)
+    colormap   = Observable(colorscheme)
     mode       = Observable(:cortex3D)
     gl_alpha   = Observable(alpha)
     animating  = Observable(false)
@@ -132,11 +132,11 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
     end
 
     colormap_list = ["rain", "magma", "bilbao", "solar", "roma", "broc", "redsblues", "vik"]
-    if !(String(colormap_choice) in colormap_list)
-        push!(colormap_list, String(colormap_choice))
+    if !(String(colorscheme) in colormap_list)
+        push!(colormap_list, String(colorscheme))
     end    
     
-    colormap_menu = Menu(f[1, 1][2, 2][1, 1], options = colormap_list, default = String(colormap_choice))
+    colormap_menu = Menu(f[1, 1][2, 2][1, 1], options = colormap_list, default = String(colorscheme))
     on(colormap_menu.selection) do s
         colormap[] = Symbol(s)
     end
@@ -150,12 +150,12 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
                     mode :: Symbol = :cortex3D,
                     title :: String = "Brain activation",
                     colorbar_label :: String = "Current density squared module",
-                    colormap_choice:: Symbol = :rain,
+                    colorscheme:: Symbol = :rain,
                     fontsize :: Real = 16.0)where {A<:Real}
     global f
     f          = Figure(backgroundcolor = RGBf(1, 1, 1), size = (1200, 700))
     t_idx      = Observable(1) #Observable referring to the time 
-    colormap   = Observable(colormap_choice)
+    colormap   = Observable(colorscheme)
     gl_alpha   = Observable(alpha)
     animating  = Observable(false)
     global_scale = Observable(true)
@@ -250,11 +250,11 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
     end
 
     colormap_list = ["rain", "magma", "bilbao", "solar", "roma", "broc", "redsblues", "vik"]
-    if !(String(colormap_choice) in colormap_list)
-        push!(colormap_list, String(colormap_choice))
+    if !(String(colorscheme) in colormap_list)
+        push!(colormap_list, String(colorscheme))
     end    
     
-    colormap_menu = Menu(f[1, 1][2, 2][1, 1], options = colormap_list, default = String(colormap_choice))
+    colormap_menu = Menu(f[1, 1][2, 2][1, 1], options = colormap_list, default = String(colorscheme))
     on(colormap_menu.selection) do s
         colormap[] = Symbol(s)
     end
