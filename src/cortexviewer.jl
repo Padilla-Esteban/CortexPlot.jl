@@ -52,12 +52,12 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
     lbl_global_alpha_var = Label(f[1, 1][3, 2][1, 3], @lift("$(round($gl_alpha, digits=3))"), width = 50)
 
     # - Colorscale slider
-    lbl_bias     = Label(f[1, 1][3, 2][1, 5], "Color scale")
-    sl_bias      = Slider(f[1, 1][3, 2][1, 6], range = 0:0.01:1, startvalue=scale_gamma[])
+    lbl_bias     = Label(f[1, 1][3, 2][1, 4], "Color scale")
+    sl_bias      = Slider(f[1, 1][3, 2][1, 5], range = 0:0.01:1, startvalue=scale_gamma[])
     connect!(scale_gamma, sl_bias.value)
-    lbl_bias_val = Label(f[1, 1][3, 2][1, 7], @lift("$(round($scale_gamma, digits=2))"), width=40)
+    lbl_bias_val = Label(f[1, 1][3, 2][1, 6], @lift("$(round($scale_gamma, digits=2))"), width=40)
 
-    scale_menu = Menu(f[1, 1][2, 2][1, 1], options= ["Global", "Local"], default="Global")
+    scale_menu = Menu(f[1, 1][2, 2][1, 2], options= ["Global", "Local"], default="Global")
    
     on(scale_menu.selection) do event 
         global_scale[] = event == "Global" ? true : false
@@ -130,7 +130,7 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
         end
     end
 
-    colormap_menu = Menu(f[1, 1][2, 1], options = ["rain", "magma", "bilbao", "solar", "roma", "broc", "redsblues", "vik"], default = "rain")
+    colormap_menu = Menu(f[1, 1][2, 2][1, 1], options = ["rain", "magma", "bilbao", "solar", "roma", "broc", "redsblues", "vik"], default = "rain")
     on(colormap_menu.selection) do s
         colormap[] = Symbol(s)
     end
