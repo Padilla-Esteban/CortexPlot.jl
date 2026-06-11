@@ -2,7 +2,7 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
                         voxels :: Int64 = 2503,
                         alpha :: Real = 1.0,
                         title :: String = "Brain activation",
-                        colorbar_label :: String = "Current density squared module",
+                        colorbar_label :: String = "Current density square module",
                         fontsize :: Real = 16.0,
                         colorscheme :: Symbol = :rain
                         )where {A<:Real}
@@ -149,7 +149,7 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
                     alpha :: Real = 1.0,
                     mode :: Symbol = :Cortex3D,
                     title :: String = "Brain activation",
-                    colorbar_label :: String = "Current density squared module",
+                    colorbar_label :: String = "Current density square module",
                     colorscheme:: Symbol = :rain,
                     fontsize :: Real = 16.0)where {A<:Real}
     global f

@@ -13,7 +13,7 @@
 
 This package allows to visualize EEG vector-type distributed inverse solutions data on a standard cortex in 2D and 3D. It is entirely written in [julia](https://julialang.org/) and is powered by [Makie.jl](https://docs.makie.org/stable/). 
 
-The data to be visualized by this package can be produced by [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl) or can be manipulations thereof.
+The data this package can visualize is easily produced with the help of [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl)
 
 > [!WARNING]
 > As usual in Julia, the time to first plot (TTFP) may be long, depending on the PC. From the second plot on, it will be much faster.
@@ -57,18 +57,18 @@ This package allows the visualization in **2D** and **3D** of **functional brain
 
 - current density square module for *p* voxels as computed by [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl). 
 
-- test-statistics obtained by testing, voxel-by-voxel, *p* hypotheses on data produced by [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl). For instance, one can perform these tests and correct for the multiplicity of comparisons across voxels using (PermutationTests.jl)[https://github.com/Marco-Congedo/PermutationTests.jl].
+- test-statistics obtained by testing, voxel-by-voxel, *p* hypotheses on data produced by [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl). For instance, one can perform these tests and correct for the multiplicity of comparisons across voxels using [PermutationTests.jl](https://github.com/Marco-Congedo/PermutationTests.jl).
 
 
 > [!TIP] 
 > Several images can be plotted, one after the other or as an animated sequence. The different frames of the sequence typically represent time samples, for example in event-related potentials, frequencies, or experimental conditions. 
-
+>
 > The standard cortices used in this package are read from [Leadfields.jl](https://github.com/Marco-Congedo/Leadfields.jl). They have been pre-computed via [BrainStorm](https://neuroimage.usc.edu/brainstorm/Introduction) by [OpenMEEG](https://openmeeg.github.io/), using the ‘fsaverage’ adult head model (FreeSurfer’s default template based on 40 normative brains). The computation of the associated leadfields is based on the Boundary Element Method (BEM).
-
+>
 > The available cortex structural data and leadfields correspond to:  
 > 1) 7509 unconstrained brain dipolar sources (*p = 2503 voxels* × 3 cartesian orientations); voxel size: 4.3mm (default)
 > 2) 15006 unconstrained brain dipolar sources (*p = 5002 voxels* × 3 cartesian orientations); voxel size: 3mm
-
+>
 > The cortical data and associated leadfields can be found [here](https://github.com/Marco-Congedo/Leadfields.jl/tree/master/Meshes).
 
 [▲ index](#-index)
@@ -81,13 +81,13 @@ The package exports only two functions. The main function runs a **dashboard**:
 
 ```julia
 function cortex_dashboard(data :: Union{Vector{Real}, Matrix{Real}};
-                        voxels :: Int = 2503,
-                        alpha :: Real = 1.0,
-                        title :: String = "Brain activation",
-                        colorbar_label :: String = "Current density square module",
-                        fontsize :: Real = 16.0,
-                        colorscheme :: Symbol = :rain
-                        )
+                    voxels :: Int = 2503,
+                    alpha :: Real = 1.0,
+                    title :: String = "Brain activation",
+                    colorbar_label :: String = "Current density square module",
+                    fontsize :: Real = 16.0,
+                    colorscheme :: Symbol = :rain
+                    )
 ```
 
 **Argument**
@@ -97,8 +97,8 @@ function cortex_dashboard(data :: Union{Vector{Real}, Matrix{Real}};
 **Optional Keyword Arguments**
 - `voxels`: the number of voxels *p* forming the solution space. It can be `2503` (default) or `5002`. 
 - `alpha`: the transparency of the cortex. By default it is 1.0 (completely opaque). 
-- `title`: the title of the plot. 
-- `colorbar_label`: the label of the color bar. By default it is "current density squared module".
+- `title`: the title of the plot(s). 
+- `colorbar_label`: the label of the color bar. By default it is "current density square module".
 - `fontsize`: the size of the font for the axes. Its default value (16.0) is the Makie's default value. 
 - `colorscheme`: The initial [color scheme](https://juliagraphics.github.io/ColorSchemes.jl/dev/catalogue/). The default is `:rain`. 
 
@@ -174,9 +174,9 @@ The "Color scale" slider sets the non-linearity of the color map.
 
 ### 🔲 Buttons
 
-The "▶" button switches between *Play* and *Pause* animation mode. 
+The ▶ button switches between *Play* and *Pause* animation mode. 
 
-The "Display max" displays the sections through the voxel with maximum value. It applies only to visualization modes 3 and 5.
+The "Display max" button displays the sections through the voxel with maximum value. It applies only to visualization modes 3 and 5.
 
 ### ⌨ Keyboard controls
 
@@ -208,40 +208,51 @@ The "Display max" displays the sections through the voxel with maximum value. It
 
 ## 💡 Examples
 
-**Example using Eegle.jl**
+Besides **CortexPlot.jl**, The following example makes use of packages 
+
+- [Eegle.jl](https://github.com/Marco-Congedo/Eegle.jl) to import example EEG data
+- [Leadfields.jl](https://github.com/Marco-Congedo/Leadfields.jl) to read a leadfield matrix
+- [Xloreta.jl](https://github.com/Marco-Congedo/Xloreta.jl) to compute the sLORETA transformation matrix and to compute current density square module vectors from current density vectors.
+- [GLMakie.jl](https://docs.makie.org/stable/explanations/backends/glmakie.html), the plotting backend.
+
+To install these packages, run
 
 ```julia
-using Eegle, CortexPlot, EEGPlot, GLMakie
+add Eegle, Leadfields, Xloreta, CortexPlot, GLMakie
+```
 
-using Leadfields, Xloreta # temp
+Then, run:
 
-# Example if you have data
+```julia
+using Eegle, Leadfields, Xloreta, CortexPlot, GLMakie
 
-# read example EEG data, sampling rate and sensor labels from Eegle
+# read example EEG data, sampling rate and sensor labels using Eegle.jl
 X, sr = readASCII(EXAMPLE_Normative_1), 128;
+X = X[1:sr, :] # use only the first 128 time samples of X
 sensors = readSensors(EXAMPLE_Normative_1_sensors);
-voxels = 5002
 
-X = X[1:sr, :] # choose only the 128 first lines of X
+# computes a leadfield matrix for 5002 voxels using Leadfields.jl
+voxels = 5002 # can also be 2503 for a lower voxel resolution.
+K, ename, eloc, gridloc = leadfield(sensors; voxels);
 
-# computes leadfield matrix with Leadfields.jl (re-exported from Eegle), 
-# you can choose voxels = 2503 or voxels = 5002
-K, ename, eloc, gridloc = leadfield(sensors; voxels) ;
-
-# calculation of sLORETA transformation matrix T with Xloreta (re-exported from Eegle), 
-# you should find a suitable alpha (regularization) value for the inverse solution
+# calculation of sLORETA transformation matrix T with Xloreta.jl.
+# NB: in general, the alpha (regularization) value for the inverse solution should be 
+# carefully chosen depending on the data. Here it is set to 1 (second argument).
 T = sLORETA(Float64.(K), 1);
 
-# calculation of curent density (size : (voxels*3) × n_samples in X)
+# calculation of curent density for each time sample in EEG data X. 
+# J_raw is a matrix of size (voxels*3) × n_samples in X
 J_raw = T * Transpose(X)  
 
-# calculation of current density module ( size : voxels × n_times) using Xloreta
+# calculation of current density module (size : voxels × n_times) using Xloreta.jl
+# This is the data that will be visualized, frame by frame (column by column)
 J = hcat((cd2sm(Vector(c)) for c in eachcol(J_raw))...)  
 
 # This is optional, to have a title and display in full screen mode directly
 GLMakie.activate!(title = "Title of my study", fullscreen = true) 
 
-cortex_dashboard(J; title="Title of my plot", voxels) # Several cortex plots, all available within a dashboard
+# Run the dashboard to visualize the data
+cortex_dashboard(J; title="Title of my plot", voxels) 
 
 # if a specific mode is desired, use instead, for example
 #cortex_plot(J; voxels, mode = :cortex3D_slice)
