@@ -149,7 +149,11 @@ function activation_rgba(values, cmap_name, limits; midpoint=0.5f0)
     warped = normalized .^ γ
 
     # Convert the colormap name into a concrete vector of RGBAf colors.
-    cmap = to_colormap(Reverse(cmap_name))
+    if cmap_name == :broc || cmap_name == :vik || cmap_name == :rain
+        cmap = to_colormap(cmap_name)
+    else
+        cmap = to_colormap(Reverse(cmap_name))
+    end
 
     n = length(cmap)
 
