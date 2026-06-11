@@ -26,6 +26,7 @@ The data that can be visualized by this package can be produced by [Xloreta](htt
 - 📦 [Installation](#-installation)
 - 🔣 [Description](#-description)
 - 🔌 [API](#-api)
+- 🎮 [Interactions](#-interactions)
 - 💡 [Examples](#-examples)
 - ✍️ [About the Author](#️-about-the-author)
 - 🌱 [Contribute](#-contribute)
@@ -98,11 +99,24 @@ function cortex_dashboard(data :: Union{Vector{Real}, Matrix{Real}};
 - `fontsize`: the size of the font for the axes. Its default value (16.0) is the Makie's default value. 
 - `colorscheme`: The initial [color scheme](https://juliagraphics.github.io/ColorSchemes.jl/dev/catalogue/). The default is `:rain`. 
 
+
+The second exported function, `cortex_plot`, can be used when only a specific visualization mode is needed.
+
+It supports exactly the same arguments as `cortex_dashboard` with the addition of keyword argument `mode`,
+which set the visualization mode. Possible values are: 
+    `:cortex3D` (default), `:cortex3D_slice`, `:cortex3D_3view`, `:cortex2D_8view`, and `:cortex2D_3view`.
+
+[▲ index](#-index)
+
+![separator](Documents/separator.png)
+
+## 🎮 Interactions
+
 The dashboard contains drop-box menus, text boxes, sliders and buttons.
 
 The first drop-box menu allows the user to switch between five available display modes:
 
-1) `Cortex3D`: the default display mode, which displays the whole cortex in 3D (Fig. 1).
+1) `Cortex3D`: the default display mode, which displays the whole cortex in 3D (Fig. 1). 
 
 <p align="left">
   <img src="Documents/Fig1.png" width="560">
@@ -111,7 +125,7 @@ The first drop-box menu allows the user to switch between five available display
 </p>
 
 
-2) `Cortex3D_slice`: displays in 3D a slice of the cortex along the x, y or z axis, which **position** and **tickness** can be set by means of sliders (Fig. 2).
+2) `Cortex3D_slice`: displays in 3D a slice of the cortex along the x, y or z axis, with any **position** and **tickness** (Fig. 2).
 
 <p align="left">
   <img src="Documents/Fig2.png" width="560">
@@ -137,7 +151,7 @@ The first drop-box menu allows the user to switch between five available display
   <em>Figure 4. Visualization mode "Cortex2D_8view".</em>
 </p>
 
-5) `Cortex2D_3view`: displays in 2D the three sections of the cortex along the x, y, and z axis, which **position** and **tickness** can be set by means of sliders individually for each axis (Fig. 5).
+5) `Cortex2D_3view`: displays in 2D the three sections of the cortex along the x, y, and z axis, each with any **position** and **tickness** (Fig. 5).
 
 <p align="left">
   <img src="Documents/Fig5.png" width="560">
@@ -148,17 +162,27 @@ The first drop-box menu allows the user to switch between five available display
 
 The second drop-box menu allows to select the color scheme for the color map.
 
-Several additional controls are available, as listed in this table:
+The third drop-box allows to switch between the *Global* and *Local* scaling mode; with *Global* scaling all frames are scaled to the maximum across all frames, while with *Local* scaling each frame is scaled to its own maximum.
+
+Several additional controls are available in the dashboard:
 
 | Control | Effect | Apply to mode |
 |:--------|:-------|:--------------|
-|   ▶    | switch between *Play* and *Pause* animation mode   |    all      |
-| Alpha   | opacity of the cortex        |     all          |
-| Global scale  | switch between *Global* and *Local* scaling        | all  |
-| Color scale   | non-linearity of the color map  | all               |
-| Display max   | set the sections through the voxel with maximum value       | 3., 5.            |
+| "▶" button | switch between *Play* and *Pause* animation mode   |    all      |
+| "Display max" button   | set the sections through the voxel with maximum value       | 3., 5.            |
+| "Alpha" slider    | opacity of the cortex        |     all          |
+| "Color scale" slider  | non-linearity of the color map  | all               |
 
-NB: with *Global* scaling all frames are scaled to the maximum across all frames; with *Local* scaling each frame is scaled to its own maximum.
+
+⌨ Keyboard controls:
+
+| key     | Effect | Apply to mode |
+|:--------|:-------|:--------------|
+| ← / → (left and right arrow)| display the previous / next frame   |    all      |
+| ↑ / ↓ (up and down arrow)| increase / decrease the position of the slice   |    2.      |
+| + / - (up and down arrow)| increase / decrease the thickness of the slice   |    2.      |
+| V | displays the three sections through the voxel under the mouse's pointer   |    3.      |
+ 
 
 > [!TIP] 
 > In addition to all the controls listed above, all the standard Makie controls are available. In particular:
@@ -177,36 +201,6 @@ NB: with *Global* scaling all frames are scaled to the maximum across all frames
 > - *CTRL + Primary mouse button click*: reset pas and zooming
 
 For more information see [here](https://docs.makie.org/stable/reference/blocks/axis3#Axis3-interactions) for 3D plots and [here](https://docs.makie.org/stable/reference/blocks/axis#Axis-interaction) for 2D plots.
-
-[▲ index](#-index)
-
-The second exported function can be used when only a specific visualization mode is needed.
-
-```julia
-function cortex_plot(data :: Union{Vector{Real}, Matrix{Real}};
-                    voxels :: Int = 2503,
-                    alpha :: Real = 1.0,
-                    mode :: Symbol = :cortex3D,
-                    title :: String = "Brain activation",
-                    colorbar_label :: String = "Current density square module",
-                    fontsize :: Real = 16.0
-                    )
-```
-
-**Argument**
-
-- `data`: a vector holding the value to be plotted at each voxel, or a matrix where each column is such a vector (a frame for a sequence).
-
-**Optional Keyword Arguments**
-- `voxels`: the number of voxels *p* forming the solution space. It can be `2503` (default) or `5002`. 
-- `alpha`: the transparency of the cortex. By default it is 1.0 (completely opaque). 
-- `mode`: The visualization mode. Possible values are: 
-    `:cortex3D` (default), `:cortex3D_slice`, `:cortex3D_3view`, `:cortex2D_8view`, and `:cortex2D_3view`.
-- `title`: the title of the plot. 
-- `colorbar_label`: the label of the color bar. By default it is "current density squared module".
-- `fontsize`: the size of the font for the axes. Its default value (16.0) is the Makie's default value. 
-- `colorscheme`: The [color scheme](https://juliagraphics.github.io/ColorSchemes.jl/dev/catalogue/). The default is `:rain`.
-
 
 [▲ index](#-index)
 
