@@ -208,20 +208,20 @@ The "Display max" button displays the sections through the voxel with maximum va
 
 ## 💡 Examples
 
-Besides **CortexPlot.jl**, The following example makes use of packages 
+Besides **CortexPlot.jl**, the following example makes use of packages 
 
 - [Eegle.jl](https://github.com/Marco-Congedo/Eegle.jl) to import example EEG data
 - [Leadfields.jl](https://github.com/Marco-Congedo/Leadfields.jl) to read a leadfield matrix
 - [Xloreta.jl](https://github.com/Marco-Congedo/Xloreta.jl) to compute the sLORETA transformation matrix and to compute current density square module vectors from current density vectors.
 - [GLMakie.jl](https://docs.makie.org/stable/explanations/backends/glmakie.html), the plotting backend.
 
-To install these packages, run
+To install these packages, run in Julia's REPL
 
 ```julia
-add Eegle, Leadfields, Xloreta, CortexPlot, GLMakie
+]add Eegle, Leadfields, Xloreta, CortexPlot, GLMakie
 ```
 
-Then, run:
+Then, run this script:
 
 ```julia
 using Eegle, Leadfields, Xloreta, CortexPlot, GLMakie
