@@ -15,10 +15,12 @@ This package allows to visualize EEG vector-type distributed inverse solutions d
 
 The data this package can visualize is easily produced with the help of [Leadfields.jl](https://github.com/Marco-Congedo/Leadfields.jl) and [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl).
 
+--- 
+
 > [!WARNING]
 > As usual in Julia, the time to first plot (TTFP) may be long, depending on the PC. From the second plot on, it will be much faster.
 
-![separator](Documents/separator.png)
+---
 
 <img width="1078" height="658" alt="CortexPlot gif" src="https://github.com/user-attachments/assets/d563b48c-602f-475f-96d1-776f8d74e7d0" />
 
@@ -63,6 +65,8 @@ This package allows the visualization in **2D** and **3D** of **functional brain
 > [!TIP] 
 > Several images can be plotted, one after the other or as an **animated sequence**. The different frames of the sequence typically represent time samples, for example in event-related potentials, frequencies, or experimental conditions. 
 
+---
+
 > The standard cortices used in this package are read from [Leadfields.jl](https://github.com/Marco-Congedo/Leadfields.jl). They have been pre-computed via [BrainStorm](https://neuroimage.usc.edu/brainstorm/Introduction) by [OpenMEEG](https://openmeeg.github.io/), using the ‘fsaverage’ adult head model (FreeSurfer’s default template based on 40 normative brains). The computation of the associated leadfields is based on the Boundary Element Method (BEM).
 >
 > The available cortex structural data and leadfields correspond to:  
@@ -70,6 +74,8 @@ This package allows the visualization in **2D** and **3D** of **functional brain
 > 2) 15006 unconstrained brain dipolar sources (*p = 5002 voxels* × 3 cartesian orientations); voxel size: 3mm
 >
 > The cortical data and associated leadfields can be found [here](https://github.com/Marco-Congedo/Leadfields.jl/tree/master/Meshes).
+
+---
 
 [▲ index](#-index)
 
@@ -118,6 +124,8 @@ The [dashboard](#-api) contains drop-box menus, text boxes, sliders and buttons.
 
 The first drop-box menu allows the user to switch between five available display modes:
 
+---
+
 1) `Cortex3D`: the default display mode, which displays the whole cortex in 3D (Fig. 1). 
 
 <p align="left">
@@ -126,6 +134,7 @@ The first drop-box menu allows the user to switch between five available display
   <em>Figure 1. Visualization mode "Cortex3D".</em>
 </p>
 
+---
 
 2) `Cortex3D_slice`: displays in 3D a slice of the cortex along the x, y or z axis, with any **position** and **tickness** (Fig. 2).
 
@@ -135,6 +144,7 @@ The first drop-box menu allows the user to switch between five available display
   <em>Figure 2. Visualization mode "Cortex3D_slice".</em>
 </p>
 
+---
 
 3) `Cortex3D_3view`: as 1., but displays also the three sections through a desired voxel. To set the voxel, either point the mouse on the cortex and hit the "V" key, or enter the voxel coordinates in the text boxes (Fig. 3).
 
@@ -144,6 +154,7 @@ The first drop-box menu allows the user to switch between five available display
   <em>Figure 3. Visualization mode "Cortex3D_3view".</em>
 </p>
 
+---
 
 4) `Cortex2D_8view`: displays eight views of the cortex in 2D (Fig. 4).
 
@@ -153,6 +164,8 @@ The first drop-box menu allows the user to switch between five available display
   <em>Figure 4. Visualization mode "Cortex2D_8view".</em>
 </p>
 
+---
+
 5) `Cortex2D_3view`: displays in 2D the three sections of the cortex along the x, y, and z axis, each with any **position** and **tickness** (Fig. 5).
 
 <p align="left">
@@ -161,6 +174,7 @@ The first drop-box menu allows the user to switch between five available display
   <em>Figure 5. Visualization mode "Cortex2D_3view".</em>
 </p>
 
+---
 
 The second drop-box menu allows to select the color scheme for the color map. Note that there two kinds of color schemes, to be used depending on the data, as suggested in this table:
 
@@ -169,17 +183,23 @@ The second drop-box menu allows to select the color scheme for the color map. No
 | rain, magma, bilbao, solar | non-negative   |  current density square module, unsigned test-statistics such as ANOVA's F  |
 | roma, broc, redsblues, vik | real   |  current density square module differences, signed test-statistics such as Pearson's r and student's t |
 
+---
+
 The third drop-box allows to switch between the *Global* and *Local* scaling mode; with *Global* scaling all frames are scaled to the maximum across all frames, while with *Local* scaling each frame is scaled to its own maximum.
 
 ### ─●─ Sliders
 
 The "Alpha" slider sets the opacity of the cortex. 
 
+---
+
 The "Color scale" slider sets the non-linearity of the color map.
 
 ### 🔲 Buttons
 
 The ▶ button switches between *Play* and *Pause* animation mode. 
+
+---
 
 The "Display max" button displays the sections through the voxel with maximum value. It applies only to visualization modes 3 and 5.
 
