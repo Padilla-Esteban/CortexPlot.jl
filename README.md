@@ -162,11 +162,16 @@ The first drop-box menu allows the user to switch between five available display
 </p>
 
 
-The second drop-box menu allows to select the color scheme for the color map.
+The second drop-box menu allows to select the color scheme for the color map. Note that there two kinds of color schemes, to be used depending on the data, as suggested in this table:
+
+| color schemes  | type of data | example usage |
+|:--------|:-------|:--------------|
+| rain, magma, bilbao, solar | non-negative   |  current density square module, unsigned test-statistics such as ANOVA's F  |
+| roma, broc, redsblues, vik | real   |  current density square module differences, signed test-statistics such as Pearson's r and student's t |
 
 The third drop-box allows to switch between the *Global* and *Local* scaling mode; with *Global* scaling all frames are scaled to the maximum across all frames, while with *Local* scaling each frame is scaled to its own maximum.
 
-### ──●── Sliders
+### ─●─ Sliders
 
 The "Alpha" slider sets the opacity of the cortex. 
 
