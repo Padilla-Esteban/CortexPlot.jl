@@ -15,12 +15,10 @@ This package allows to visualize EEG vector-type distributed inverse solutions d
 
 The data this package can visualize is easily produced with the help of [Leadfields.jl](https://github.com/Marco-Congedo/Leadfields.jl) and [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl).
 
+<img width="1078" height="658" alt="CortexPlot gif" src="https://github.com/user-attachments/assets/d563b48c-602f-475f-96d1-776f8d74e7d0" />
+
 > [!WARNING]
 > As usual in Julia, the time to first plot (TTFP) may be long, depending on the PC. From the second plot on, it will be much faster.
-
-![separator](Documents/separator.png)
-
-<img width="1078" height="658" alt="CortexPlot gif" src="https://github.com/user-attachments/assets/d563b48c-602f-475f-96d1-776f8d74e7d0" />
 
 ![separator](Documents/separator.png)
 
