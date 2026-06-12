@@ -61,6 +61,7 @@ This package allows the visualization in **2D** and **3D** of **functional brain
 
 - **test-statistics** obtained by testing, voxel-by-voxel, *p* hypotheses on data produced by [Xloreta](https://github.com/Marco-Congedo/Xloreta.jl). For instance, one can perform these tests and correct for the multiplicity of comparisons across voxels using [PermutationTests.jl](https://github.com/Marco-Congedo/PermutationTests.jl).
 
+---
 
 > [!TIP] 
 > Several images can be plotted, one after the other or as an **animated sequence**. The different frames of the sequence typically represent time samples, for example in event-related potentials, frequencies, or experimental conditions. 
@@ -75,7 +76,6 @@ This package allows the visualization in **2D** and **3D** of **functional brain
 >
 > The cortical data and associated leadfields can be found [here](https://github.com/Marco-Congedo/Leadfields.jl/tree/master/Meshes).
 
----
 
 [▲ index](#-index)
 
@@ -191,15 +191,11 @@ The third drop-box allows to switch between the *Global* and *Local* scaling mod
 
 The "Alpha" slider sets the opacity of the cortex. 
 
----
-
 The "Color scale" slider sets the non-linearity of the color map.
 
 ### 🔲 Buttons
 
 The ▶ button switches between *Play* and *Pause* animation mode. 
-
----
 
 The "Display max" button displays the sections through the voxel with maximum value. It applies only to visualization modes 3 and 5.
 
@@ -233,7 +229,7 @@ The "Display max" button displays the sections through the voxel with maximum va
 
 ## 💡 Examples
 
-Besides **CortexPlot.jl**, the following example makes use of packages 
+Besides **CortexPlot.jl**, the following example makes use of packages: 
 
 - [Eegle.jl](https://github.com/Marco-Congedo/Eegle.jl) to import example EEG data
 - [Leadfields.jl](https://github.com/Marco-Congedo/Leadfields.jl) to read a leadfield matrix
