@@ -59,7 +59,8 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
     lbl_bias_val = Label(f[1, 1][3, 2][1, 6], @lift("$(round($scale_gamma, digits=2))"), width=40)
 
     scale_menu = Menu(f[1, 1][2, 2][1, 2], options= ["Global Scale", "Local Scale"], default="Global Scale")
-   
+    translate!(scale_menu.blockscene, 0, 0, 5000)
+
     on(scale_menu.selection) do event 
         global_scale[] = event == "Global Scale" ? true : false
     end
@@ -102,6 +103,7 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
     menu = Menu(f[1, 1][2, 1],
                 options = ["Cortex3D", "Cortex3D_slice", "Cortex3D_3_view", "Cortex2D_8_view", "Cortex2D_3_view"],
                 default = "Cortex3D")
+    translate!(menu.blockscene, 0, 0, 5000)
 
     # - Initial display -
     let content = GridLayout(f[2, 1])
@@ -137,6 +139,8 @@ function cortex_dashboard(data :: Union{Vector{A}, Matrix{A}};
     end    
     
     colormap_menu = Menu(f[1, 1][2, 2][1, 1], options = colormap_list, default = String(colorscheme))
+    translate!(colormap_menu.blockscene, 0, 0, 5000)
+
     on(colormap_menu.selection) do s
         colormap[] = Symbol(s)
     end
@@ -200,7 +204,8 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
     lbl_bias_val = Label(f[1, 1][2, 2][1, 4], @lift("$(round($scale_gamma, digits=2))"), width=40)
 
     scale_menu = Menu(f[1, 1][2, 2], options= ["Global Scale", "Local Scale"], default="Global Scale")
-   
+    translate!(scale_menu.blockscene, 0, 0, 5000)
+
     on(scale_menu.selection) do event 
         global_scale[] = event == "Global Scale" ? true : false
     end
@@ -255,6 +260,8 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
     end    
     
     colormap_menu = Menu(f[1, 1][2, 1], options = colormap_list, default = String(colorscheme))
+    translate!(colormap_menu.blockscene, 0, 0, 5000)
+
     on(colormap_menu.selection) do s
         colormap[] = Symbol(s)
     end
