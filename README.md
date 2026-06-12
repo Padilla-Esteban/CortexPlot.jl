@@ -136,7 +136,7 @@ The first drop-box menu allows the user to switch between five available display
 
 ---
 
-2) `Cortex3D_slice`: displays in 3D a slice of the cortex along the x, y or z axis, with any **position** and **tickness** (Fig. 2).
+2) `Cortex3D_slice`: displays in 3D a slice of the cortex along the x, y or z axis, with any **position** and **thickness** (Fig. 2).
 
 <p align="left">
   <img src="Documents/Fig2.png" width="560">
@@ -166,7 +166,7 @@ The first drop-box menu allows the user to switch between five available display
 
 ---
 
-5) `Cortex2D_3view`: displays in 2D the three sections of the cortex along the x, y, and z axis, each with any **position** and **tickness** (Fig. 5).
+5) `Cortex2D_3view`: displays in 2D the three sections of the cortex along the x, y, and z axis, each with any **position** and **thickness** (Fig. 5).
 
 <p align="left">
   <img src="Documents/Fig5.png" width="560">
