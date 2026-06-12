@@ -199,7 +199,7 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
     connect!(scale_gamma, sl_bias.value)
     lbl_bias_val = Label(f[1, 1][2, 2][1, 4], @lift("$(round($scale_gamma, digits=2))"), width=40)
 
-    scale_menu = Menu(f[1, 1][2, 2][1, 1], options= ["Global Scale", "Local Scale"], default="Global Scale")
+    scale_menu = Menu(f[1, 1][2, 2], options= ["Global Scale", "Local Scale"], default="Global Scale")
    
     on(scale_menu.selection) do event 
         global_scale[] = event == "Global Scale" ? true : false
@@ -254,7 +254,7 @@ function cortex_plot(data :: Union{Vector{A}, Matrix{A}};
         push!(colormap_list, String(colorscheme))
     end    
     
-    colormap_menu = Menu(f[1, 1][2, 2][1, 1], options = colormap_list, default = String(colorscheme))
+    colormap_menu = Menu(f[1, 1][2, 1], options = colormap_list, default = String(colorscheme))
     on(colormap_menu.selection) do s
         colormap[] = Symbol(s)
     end
